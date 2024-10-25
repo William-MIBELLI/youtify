@@ -2,20 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer utilities {
+  .left {
+    clip-path: polygon(0 0, 100% 0, calc(100% - 100px) 100%, 0 100%);
   }
-}
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  .right {
+    clip-path: polygon(100px 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .selector {
+    @apply hover:w-full transition-all duration-300 flex justify-center items-center z-10 hover:z-20 cursor-pointer
+  }
+
+  .title {
+    @apply text-3xl font-thin text-left 
+  }
 }
