@@ -4,7 +4,7 @@ import Image from "next/image";
 import {
   getSpotifyToken,
   getUserPlaylists,
-} from "@/lib/request/spotify.request";
+} from "@/src/lib/request/spotify.request";
 import Link from "next/link";
 
 const OriginSelector = () => {
