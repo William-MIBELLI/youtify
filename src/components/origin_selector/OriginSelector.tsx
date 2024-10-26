@@ -1,26 +1,22 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import {
-  getSpotifyToken,
-  getUserPlaylists,
-} from "@/src/lib/request/spotify.request";
 import Link from "next/link";
 
 const OriginSelector = () => {
-  const onCLickHandler = async () => {
-    const data = await getSpotifyToken();
-    console.log("CLICK : ", data);
-  };
+  // const onCLickHandler = async () => {
+  //   const data = await getSpotifyToken();
+  //   console.log("CLICK : ", data);
+  // };
 
-  const onGetUserPlaylist = async () => {
-    const tokenData = await getSpotifyToken();
-    if (!tokenData) {
-      return;
-    }
-    const data = await getUserPlaylists("aspirin11", tokenData.access_token);
-    console.log("DATA : ", data);
-  };
+  // const onGetUserPlaylist = async () => {
+  //   const tokenData = await getSpotifyToken();
+  //   if (!tokenData) {
+  //     return;
+  //   }
+  //   const data = await getUserPlaylists("aspirin11", tokenData.access_token);
+  //   console.log("DATA : ", data);
+  // };
 
   return (
     <div className="border border-gray-900 flex w-1/2 h-96  rounded-xl overflow-x-hidden justify-center relative">
