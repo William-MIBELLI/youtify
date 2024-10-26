@@ -29,9 +29,9 @@ export default function RootLayout({
       <body
         className={`${roboto.className} antialiased bg-gray-950 min-h-screen`}
       >
-        <nav className="w-full p-2   mb-8">
+        <nav className="w-full py-2 px-6   mb-8">
           <Link href={'/'}>
-            <h1 className={`text-7xl my-2 text-gray-400 hover:text-gray-300 ${titleFont.className} `}>Youtify</h1>
+            <h1 className={`text-7xl my-2 w-fit text-gray-400 hover:text-gray-300 ${titleFont.className} `}>Youtify</h1>
           </Link>
         </nav>
         {children}

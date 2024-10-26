@@ -76,6 +76,7 @@ export interface ISpotifyToken {
   token_type: string;
   expires_in: number;
 };
+
 export interface IPlaylistTracksList {
   href: string,
   limit: number,
