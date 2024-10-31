@@ -1,10 +1,19 @@
 import { IPlaylistTracksList } from "@/src/interface/spotify.interface";
-import { Checkbox, CheckboxGroup } from "@nextui-org/react";
+import { Button, Checkbox, CheckboxGroup } from "@nextui-org/react";
 import React, { FC, useEffect, useState } from "react";
 import Step from "../stepper/Step";
+import { sendSpotifyPlaylistToAPI } from "@/src/lib/request/api.request";
+
+
+export interface PlaylistItemForSelector {
+  title: string;
+  artist: string;
+  id: string;
+  duration?: number
+}
 
 interface IProps {
-  playlist: IPlaylistTracksList;
+  playlist: PlaylistItemForSelector[];
 }
 
 const TrackSelector: FC<IProps> = ({ playlist }) => {
@@ -15,8 +24,8 @@ const TrackSelector: FC<IProps> = ({ playlist }) => {
 
   //AU MONTAGE, ON CREE UN TABLEAU DE STRING POUR LES VALUES DU CHECKBOXGROUP
   useEffect(() => {
-    const mappedTracks = playlist.items.map((item) => {
-      return `${item.track.name} - ${item.track.artists[0].name}`;
+    const mappedTracks = playlist.map((item) => {
+      return `${item.title} - ${item.artist}`;
     });
     setMappedTracksValue(mappedTracks);
   }, [playlist]);
@@ -42,6 +51,11 @@ const TrackSelector: FC<IProps> = ({ playlist }) => {
       return setSelectedTracks(mappedTracksValue);
     }
     setSelectedTracks([]);
+  }
+
+  const onConverterClick = async () => {
+    const data = await sendSpotifyPlaylistToAPI(selectedTracks);
+    console.log('DATA FROM API : ', data);
   }
 
   return (
@@ -74,9 +88,9 @@ const TrackSelector: FC<IProps> = ({ playlist }) => {
 
         
         {/* MAP SUR LA PLAYLIST POUR GENERER LES CHECKBOXS */}
-        {playlist.items.map((item) => (
+        {playlist.map((item) => (
           <Checkbox
-            value={`${item.track.name} - ${item.track?.artists[0].name}`}
+            value={`${item.title} - ${item.artist}`}
             key={Math.random()}
             onChange={onChangeHandler}
             classNames={{
@@ -87,13 +101,18 @@ const TrackSelector: FC<IProps> = ({ playlist }) => {
             <div
               className={`min-w-full grid grid-cols-3 text-gray-400 gap-4 items-center`}
             >
-              <div>{item.track.name}</div>
-              <div>{item.track.artists[0].name}</div>
-              <div>{(item.track.duration_ms / 60000).toFixed(2)}</div>
+              <div>{item.title}</div>
+              <div>{item.artist}</div>
+              {
+                item?.duration && (
+                  <div>{(item.duration / 60000).toFixed(2)}</div>
+                )
+              }
             </div>
           </Checkbox>
         ))}
       </CheckboxGroup>
+      <Button onClick={onConverterClick}>Convert</Button>
     </Step>
   );
 };

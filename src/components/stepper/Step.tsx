@@ -5,14 +5,16 @@ interface IProps {
   children?: React.ReactNode;
   index: number;
   title: string;
+  color?: string;
 }
-const Step: FC<IProps> = ({ children, index, title }) => {
+const Step: FC<IProps> = ({ children, index, title, color = 'emerald' }) => {
+
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-[3rem,1fr] items-center">
         <StepIndex index={index} />
         <div className="flex flex-col my-4">
-          <h3 className="text-2xl font-semibold text-emerald-400">{title}</h3>
+          <h3 className={`text-2xl font-semibold text-${color}-400`}>{title}</h3>
         </div>
         <div className="col-start-2">{children}</div>
       </div>

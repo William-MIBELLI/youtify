@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Roboto,  Pacifico, Yellowtail, Monoton } from 'next/font/google'
 import Link from "next/link";
+import { SessionProvider } from "next-auth/react";
+import Container from "../components/Container";
 
 
 const roboto = Roboto({
@@ -26,16 +28,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${roboto.className} antialiased bg-gray-950 min-h-screen`}
-      >
-        <nav className="w-full py-2 px-6   mb-8">
-          <Link href={'/'}>
-            <h1 className={`text-7xl my-2 w-fit text-gray-400 hover:text-gray-300 ${titleFont.className} `}>Youtify</h1>
-          </Link>
-        </nav>
-        {children}
-      </body>
+      <>
+        <body
+          className={`${roboto.className} antialiased bg-gray-950 min-h-screen`}
+        >
+          <nav className="w-full py-2 px-6   mb-8">
+            <Link href={'/'}>
+              <h1 className={`text-7xl my-2 w-fit text-gray-400 hover:text-gray-300 ${titleFont.className} `}>Youtify</h1>
+            </Link>
+          </nav>
+          <Container>
+            {children}
+
+          </Container>
+        </body>
+      </>
     </html>
   );
 }

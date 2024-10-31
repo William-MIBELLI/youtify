@@ -12,8 +12,10 @@ import { useFormState } from "react-dom";
 import StepIndex from "./StepIndex";
 import Step from "./Step";
 import TrackSelector from "../trackSelector/TrackSelector";
+import SearchInput from "../input/SearchInput";
+import { mapSpotifyPlaylist } from "@/src/lib/helpers/mapper";
 
-const Stepper = () => {
+const SpotifyStepper = () => {
 
   const [tracks, setTracks] = useState<IPlaylistTracksList>();
   const [selectedPlaylist, setSelectedPlaylist] = useState<string>();
@@ -52,14 +54,7 @@ const Stepper = () => {
       {/* SELECT USER */}
       <Step index={1} title="Select an user">
         <form action={action} noValidate className="">
-          <div className="flex gap-2">
-            <Input variant="bordered" name="userId" />
-            <Button
-              type="submit"
-              endContent={<Search size={20} />}
-              isIconOnly
-            />
-          </div>
+          <SearchInput name={'userId'} />
         </form>
       {state?.error && (
         <div className="text-xs text-center text-red-500 mt-5">{state.error}</div>
@@ -91,10 +86,10 @@ const Stepper = () => {
       )}
 
       {/* TRACKS LIST */}
-      {tracks && <TrackSelector playlist={tracks} />}
+      {tracks && <TrackSelector playlist={mapSpotifyPlaylist(tracks)} />}
       <div className="h-20"></div>
     </div>
   );
 };
 
-export default Stepper;
+export default SpotifyStepper;
