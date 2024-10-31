@@ -1,19 +1,15 @@
 "use client";
-import { authorize } from "@/src/lib/request/auth.request";
 import { Button, Spinner } from "@nextui-org/react";
 import React, { useState } from "react";
 import Step from "./Step";
 import SearchInput from "../input/SearchInput";
 import { MessageCircleQuestion } from "lucide-react";
-import { useFormState } from "react-dom";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { IYoutubePlaylist } from "@/src/interface/youtube.interface";
 import {
   getItemsFromPlaylist,
-  getPlaylistWithAPI,
   getUserPlaylist,
   PlaylistItem,
-  PlaylistsYT,
 } from "@/src/lib/request/youtube.request";
 import TrackSelector from "../trackSelector/TrackSelector";
 import { mapYTPlaylist } from "@/src/lib/helpers/mapper";
@@ -39,18 +35,7 @@ const YoutubeStepper = () => {
   };
 
   const onPlaylistClick = async (id: string) => {
-    // const response = await fetch(`https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=100&playlistId=${id}&key=AIzaSyDf6jU5jJIPlukKGrc9f4sNzfB_je6eTfI`, {
-    //   method: 'GET',
-    //   headers: {
-    //     Authorization: `Bearer ${session?.data?.accessToken}`,
-    //     Accept: "application/json",
-    //   },
-    // })
-    // if (!response.ok) {
-    //   console.log("reponse error : ", response.status);
-    // }
-    // const data = (await response.json());
-    // console.log("DATA : ", data);
+
     if (!session?.data?.accessToken) {
       return;
     }
