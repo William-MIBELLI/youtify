@@ -1,4 +1,5 @@
 import { NextAuthOptions, AuthOptions } from "next-auth"
+import GoogleProvider from 'next-auth/providers/google'
 
 export const authOptions : NextAuthOptions = {
   // Configure one or more authentication providers
@@ -8,7 +9,7 @@ export const authOptions : NextAuthOptions = {
       clientSecret: process.env.GOOGLE_SECRET!,
       authorization: {
         params: {
-          scope: 'openid email profile https://www.googleapis.com/auth/youtube.readonly'
+          scope: 'openid email profile https://www.googleapis.com/auth/youtube'
           // ou pour un accès complet :
           // scope: 'openid email profile https://www.googleapis.com/auth/youtube'
         }
