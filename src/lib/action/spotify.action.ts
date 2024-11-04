@@ -1,7 +1,8 @@
 'use server';
 
-import { ISpotifyToken } from "@/src/interface/spotify.interface";
-import { fetchSpotifyToken, getSpotifyUserPlaylists } from "../request/spotify.request";
+import { ISpotifyToken, SpotifyTrack } from "@/src/interface/spotify.interface";
+import { fetchSpotifyToken, getSpotifyUserPlaylists, retrieveTrackOnSpotify } from "../request/spotify.request";
+import { mapCheckGroupValueToURLParams } from "../helpers/mapper";
 
 export const searchSpotifyUserPlaylistACTION = async (state: unknown, fd: FormData) => {
   try {
@@ -47,4 +48,32 @@ export const getSpotifyToken = async () => {
 
   //ON CHECK S'IL EST TOUJOURS VALIDE
   const now = Date.now()
+}
+
+export const convertYoutubeVideoToSpotifyTrack = async (tracks: string[], state: unknown, fd: FormData) => {
+  try {
+
+    //ON CREE UN TABLEAU VIDE DE TRACKS SPOTIFY
+    const result: SpotifyTrack[] = [];
+
+    //ON MAP LES SELECTEDTRACKS VERS DES URLSEARCHPARAMS
+    const mappedTracks = mapCheckGroupValueToURLParams(tracks);
+
+    //ON LOOP SUR CHAQUE URL
+    const spotifyTracks = await Promise.all(mappedTracks.map(async (params) => {
+      //ON CALL L'API SPOTIFY POUR RECUP LE TRACK CORRESPONDANT
+      const track = await retrieveTrackOnSpotify(params);
+      // console.log('TRACK DANS LACTION : ', track);
+      //SI ON A UN TRACKS, ON LE PUSH DANS RESULT
+      if (track) {
+        // console.log('ON RENTRE DANS LE IF')
+        return track
+      }
+    }))     
+    
+    return { success: true, data: spotifyTracks};
+  } catch (error: any) {
+    console.log('ERROR CONVERT YOUTUBE VIDEO TO SPOTIFY ACTION : ', error?.message);
+    return { error: error?.message || 'Something goes wrong', success: false };
+  }
 }

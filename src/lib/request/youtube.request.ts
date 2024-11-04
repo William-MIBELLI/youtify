@@ -25,6 +25,7 @@ export const getUserPlaylist = async (accessToken: string) => {
     );
     if (!response.ok) {
       console.log("reponse error : ", response.status);
+      throw new Error('Response statuts : ' + response.statusText)
     }
     const data = (await response.json()) as IYoutubePlaylist;
     

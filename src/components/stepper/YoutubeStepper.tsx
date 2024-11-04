@@ -72,7 +72,7 @@ const YoutubeStepper = () => {
           </div>
         )}
       </Step>
-      {playlists && (
+      {(playlists && playlists.items.length > 0) && (
         <Step index={2} title="Select a playlist">
           {playlists.items.map((item) => (
             <div className={`cursor-pointer hover:font-semibold hover:text-gray-200`} key={item.id} onClick={() => onPlaylistClick(item.id)}>

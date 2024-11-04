@@ -1,5 +1,4 @@
 import YoutubeStepper from '@/src/components/stepper/YoutubeStepper'
-import { authorize } from '@/src/lib/request/auth.request'
 import { Button } from '@nextui-org/react'
 import React from 'react'
 

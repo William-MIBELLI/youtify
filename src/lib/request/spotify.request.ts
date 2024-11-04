@@ -2,9 +2,16 @@
 
 import {
   IPlaylistTracksList,
+  ISearchResult,
   ISpotifyToken,
   IUserPlaylist,
+  SpotifyToken,
+  SpotifyTrack,
 } from "@/src/interface/spotify.interface";
+import { getCodeChallenge } from "../spotifyAuth/spotify.auth";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { URLSearchParams } from "url";
 
 const API_ENDPOINT = "https://api.spotify.com/v1";
 
@@ -82,15 +89,6 @@ export const getSpotifyUserPlaylists = async (
   }
 };
 
-// export const getSpotifyUser = async () => {
-//   try {
-//     const response = await fetch(`${API_ENDPOINT}/`)
-//   } catch (error: any) {
-//     console.log('ERROR GET SPOTIFY USER : ', error?.messgae);
-//     return null;
-//   }
-// }
-
 export const getPlaylistTracks = async (playlistId: string) => {
   try {
     //ON FETCH UN TOKEN
@@ -133,6 +131,114 @@ export const getPlaylistTracks = async (playlistId: string) => {
     return mappedData;
   } catch (error: any) {
     console.log("ERROR GET PLYALIST TRACKS : ", error?.message);
+    return null;
+  }
+};
+
+export const authInSpotify = async () => {
+  const client_id = process.env.SPOTIFY_CLIENT_ID as string;
+  const redirect_uri = process.env.SPOTIFY_REDIRECT_URI as string;
+  const scope = "user-read-private user-read-email playlist-modify-public";
+  const authUrl = new URL("https://accounts.spotify.com/authorize");
+  // const code_challenge = await getCodeChallenge();
+  const state = crypto.randomUUID();
+  const cookieStore = await cookies();
+  cookieStore.set("state", state, {
+    httpOnly: true,
+    maxAge: 3600,
+  });
+  const params = {
+    response_type: "code",
+    client_id,
+    scope,
+    redirect_uri,
+    state,
+  };
+
+  authUrl.search = new URLSearchParams(params).toString();
+  redirect(authUrl.toString());
+};
+
+export const getTokensFromSpotifyAPI = async (code: string) => {
+  const client_id = process.env.SPOTIFY_CLIENT_ID as string;
+  const client_secret = process.env.SPOTIFY_CLIENT_SECRET as string;
+  const encodedAuth = Buffer.from(`${client_id}:${client_secret}`).toString(
+    "base64"
+  );
+
+  try {
+    const response = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${encodedAuth}`,
+      },
+      body: new URLSearchParams({
+        code,
+        redirect_uri: process.env.SPOTIFY_REDIRECT_URI as string,
+        grant_type: "authorization_code",
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Response error : ${response.statusText}`);
+    }
+
+    const token = (await response.json()) as SpotifyToken;
+
+    return token;
+  } catch (error: any) {
+    console.log("ERROR GET ACCESS TOKEN SPOTIFY : ", error?.message);
+    return null;
+  }
+};
+
+export const getTokensFromCookies = async (code: string, state: string) => {
+  try {
+    // Récupération des cookies - pas besoin de await car cookies() n'est pas async
+    const cookieStore = await cookies();
+    const temp_code = cookieStore.get("temp_code")?.value;
+    const temp_state = cookieStore.get("temp_state")?.value;
+    const temp_token = cookieStore.get("temp_token")?.value;
+
+    //ON CHECK SI LE CODE ET LE STATE EST BON
+    if (code !== temp_code || state !== temp_state) {
+      console.log(code, temp_code, state, temp_state);
+      throw new Error("validation error. code or state not match.");
+    }
+
+    //ON CLEAN LES COOKIES - pas besoin de await
+    //  cookieStore.set('temp_code', '');
+    //  cookieStore.set('temp_state', '');
+    //  cookieStore.set('temp_access_token', '');
+    //  cookieStore.set('temp_refresh_token', '');
+    return JSON.parse(temp_token || "");
+  } catch (error: any) {
+    console.log("ERROR GET TOKENS FROM COOKIES : ", error?.message);
+    return null;
+  }
+};
+
+export const retrieveTrackOnSpotify = async (params: string) => {
+  try {
+
+    const token = await fetchSpotifyToken();
+    const url = `${API_ENDPOINT}/search/?q=${params}&type=track&limit=1`;
+    // console.log('URL : ', url);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token?.access_token}`
+      }
+    })
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    const res = await response.json() as {tracks: ISearchResult};
+    const track = res.tracks.items[0]
+    return track;
+  } catch (error: any) {
+    console.log('ERROR RETRIEVE TRACKS ON SPOTIFY REQUEST : ', error?.message);
     return null;
   }
 };

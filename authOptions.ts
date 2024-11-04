@@ -14,8 +14,7 @@ export const authOptions : NextAuthOptions = {
           // scope: 'openid email profile https://www.googleapis.com/auth/youtube'
         }
       }, 
-    }),
-    // ...add more providers here
+    })
   ],
   callbacks: {
     jwt({ token, account }) {

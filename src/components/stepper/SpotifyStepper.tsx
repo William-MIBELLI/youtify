@@ -4,7 +4,7 @@ import {
   IUserPlaylist,
 } from "@/src/interface/spotify.interface";
 import { searchSpotifyUserPlaylistACTION } from "@/src/lib/action/spotify.action";
-import { getPlaylistTracks } from "@/src/lib/request/spotify.request";
+import { authInSpotify, getPlaylistTracks } from "@/src/lib/request/spotify.request";
 import { Button, Input } from "@nextui-org/react";
 import { Search } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -14,6 +14,7 @@ import Step from "./Step";
 import TrackSelector from "../trackSelector/TrackSelector";
 import SearchInput from "../input/SearchInput";
 import { mapSpotifyPlaylist } from "@/src/lib/helpers/mapper";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 const SpotifyStepper = () => {
 
@@ -25,6 +26,8 @@ const SpotifyStepper = () => {
     searchSpotifyUserPlaylistACTION,
     undefined
   );
+
+  const session = useSession();
 
   const onPlaylistClick = async (playlistId: string) => {
     //SI LA PLAYLIST EST DEJA SELECTED, ON FAST RETURN
@@ -49,8 +52,13 @@ const SpotifyStepper = () => {
     setTracks(undefined);
   }, [state]);
 
+  const onLoginClick = async () => {
+    await authInSpotify();
+  }
+
   return (
     <div className="w-full flex flex-col gap-5">
+      <Button onClick={onLoginClick}>Spotify LOGIN</Button>
       {/* SELECT USER */}
       <Step index={1} title="Select an user">
         <form action={action} noValidate className="">
