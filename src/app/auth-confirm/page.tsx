@@ -1,4 +1,5 @@
 import AuthCompleteClient from '@/src/components/auth-complete/AuthCompleteClient';
+import { SpotifyToken } from '@/src/interface/spotify.interface';
 import { getTokensFromCookies } from '@/src/lib/request/spotify.request';
 import React, { FC } from 'react'
 
@@ -17,14 +18,16 @@ const page: FC<IProps> = async ({ searchParams }) => {
     )
   }
 
-  const token = await getTokensFromCookies(code, state);
+  const data = await getTokensFromCookies(code, state);
 
-  if (!token) {
+  if (!data) {
     return <div>
       No tokens 🥲
     </div>
   }
 
+  const limitDate = Date.now() + (3500 * 1000)
+  const token: SpotifyToken = {...data, limitDate}
   return (
     <div>
       <AuthCompleteClient token={token} />

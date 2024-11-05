@@ -4,7 +4,7 @@ import React from 'react'
 
 const page = async () => {
   return (
-    <div className="h-auto w-3/4 mx-auto flex flex-col gap-5 mt-16 text-gray-400 ">
+    <div className="container">
       <h2 className="title text-white">From Youtube to Spotify</h2>
       <YoutubeStepper/>
     </div>

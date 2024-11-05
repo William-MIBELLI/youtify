@@ -8,7 +8,7 @@ export async function GET(request: Request) {
 
   const cookieStore = await cookies();
   //ON LES DESTRUCTURE
-  const code = searchParams.get("code");
+  const code = searchParams.get("code");  
   const error = searchParams.get("error");
   const state = searchParams.get("state");
   const cookieState = cookieStore.get("state");

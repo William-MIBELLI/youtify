@@ -19,4 +19,8 @@
   .title {
     @apply text-3xl font-thin text-left 
   }
+
+  .container{
+    @apply h-auto w-3/4 mx-auto flex flex-col gap-5 mt-16 text-gray-400 
+  }
 }

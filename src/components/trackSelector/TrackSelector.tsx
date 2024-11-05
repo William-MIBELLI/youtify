@@ -5,6 +5,8 @@ import Step from "../stepper/Step";
 import { sendSpotifyPlaylistToAPI } from "@/src/lib/request/api.request";
 import { useFormState } from "react-dom";
 import { convertYoutubeVideoToSpotifyTrack } from "@/src/lib/action/spotify.action";
+import { usePlaylistContext } from "@/src/context/PlaylistContext.context";
+import { useRouter } from "next/navigation";
 
 
 export interface PlaylistItemForSelector {
@@ -16,12 +18,17 @@ export interface PlaylistItemForSelector {
 
 interface IProps {
   playlist: PlaylistItemForSelector[];
+  from: origin;
 }
 
-const TrackSelector: FC<IProps> = ({ playlist }) => {
+export type origin = 'youtube' | 'spotify';
+
+const TrackSelector: FC<IProps> = ({ playlist, from }) => {
 
   const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
   const [mappedTracksValue, setMappedTracksValue] = useState<string[]>([]);
+  const { setSpotifyPlaylist, setYoutubePlaylist } = usePlaylistContext();
+  const router = useRouter();
 
 
   //AU MONTAGE, ON CREE UN TABLEAU DE STRING POUR LES VALUES DU CHECKBOXGROUP
@@ -57,12 +64,18 @@ const TrackSelector: FC<IProps> = ({ playlist }) => {
 
   const [state, action] = useFormState(convertYoutubeVideoToSpotifyTrack.bind(null, selectedTracks), undefined);
 
-
+  //RESULTAT DU SUBMIT
   useEffect(() => {
+
+    //SI LE STATE EST SUCCESS ET QU'ON A DES DATA
     if (state?.success && state?.data) {
-      state.data.forEach(item => {
-        console.log('URL : ', item?.name, item?.artists[0].name, item?.external_urls);
-      })
+
+      //ON INJECTE LES DATA DANS LE STATE CORRESPONDANT ET ON REDIRECT
+      if (from === 'youtube') {
+        setSpotifyPlaylist(state.data);
+        router.push('/to-spotify');
+        return;
+      }
     }
   }, [state])
   

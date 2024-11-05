@@ -94,7 +94,7 @@ const SpotifyStepper = () => {
       )}
 
       {/* TRACKS LIST */}
-      {tracks && <TrackSelector playlist={mapSpotifyPlaylist(tracks)} />}
+      {tracks && <TrackSelector from="spotify" playlist={mapSpotifyPlaylist(tracks)} />}
       <div className="h-20"></div>
     </div>
   );

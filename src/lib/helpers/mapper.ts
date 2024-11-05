@@ -1,6 +1,6 @@
 import { PlaylistItemForSelector } from "@/src/components/trackSelector/TrackSelector";
 import { PlaylistItem } from "../request/youtube.request";
-import { IPlaylistTracksList } from "@/src/interface/spotify.interface";
+import { IPlaylistTracksList, SpotifyToken } from "@/src/interface/spotify.interface";
 
 export const mapYTPlaylist = (
   itemsList: PlaylistItem
@@ -51,3 +51,7 @@ export const mapCheckGroupValueToURLParams = (list: string[]) => {
 
   return mapped;
 }
+export const addLimitDate = (token: Omit<SpotifyToken, 'limitDate'>): SpotifyToken => {
+  const limitDate = Date.now();
+  return { ...token, limitDate };
+ }

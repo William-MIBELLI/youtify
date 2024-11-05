@@ -1,10 +1,10 @@
-
 import type { Metadata } from "next";
 import "./globals.css";
 import { Roboto } from "next/font/google";
 import NavBar from "../components/navbar/NavBar";
 import SessionWrapper from "../components/sessionWrapper/SessionWrapper";
-import { SpotifyProvider } from "../context/spotifySession/SpotifySession.context";
+import { SpotifyProvider } from "../context/SpotifySession.context";
+import { PlaylistContextProvider } from "../context/PlaylistContext.context";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -25,12 +25,15 @@ export default function RootLayout({
     <html lang="en">
       <SessionWrapper>
         <SpotifyProvider>
+          <PlaylistContextProvider>
           <body
             className={`${roboto.className} antialiased bg-gray-950 min-h-screen`}
           >
             <NavBar />
             {children}
           </body>
+
+          </PlaylistContextProvider>
         </SpotifyProvider>
       </SessionWrapper>
     </html>

@@ -82,7 +82,7 @@ const YoutubeStepper = () => {
         </Step>
       )}
       {videos && (
-        <TrackSelector playlist={mapYTPlaylist(videos)}/>
+        <TrackSelector from="youtube" playlist={mapYTPlaylist(videos)}/>
       )}
     </div>
   );

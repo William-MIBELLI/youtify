@@ -71,7 +71,7 @@ export interface ISpotifyUser extends Partial<{
   uri: string
 }> { };
 
-export interface ISpotifyToken {
+export interface ISpotifyRequestToken {
   access_token: string;
   token_type: string;
   expires_in: number;
@@ -112,6 +112,7 @@ export interface SpotifyToken {
   expires_in: number;
   refresh_token: string;
   scope: string;
+  limitDate: number;
 }
 
 export interface SpotifyTrack {
