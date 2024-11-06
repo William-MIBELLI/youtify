@@ -2,11 +2,11 @@ import { IPlaylistTracksList } from "@/src/interface/spotify.interface";
 import { Button, Checkbox, CheckboxGroup } from "@nextui-org/react";
 import React, { FC, useEffect, useState } from "react";
 import Step from "../stepper/Step";
-import { sendSpotifyPlaylistToAPI } from "@/src/lib/request/api.request";
 import { useFormState } from "react-dom";
 import { convertYoutubeVideoToSpotifyTrack } from "@/src/lib/action/spotify.action";
 import { usePlaylistContext } from "@/src/context/PlaylistContext.context";
 import { useRouter } from "next/navigation";
+import { usePlaylistStore } from "@/src/store/Playlist.store";
 
 
 export interface PlaylistItemForSelector {
@@ -29,6 +29,7 @@ const TrackSelector: FC<IProps> = ({ playlist, from }) => {
   const [mappedTracksValue, setMappedTracksValue] = useState<string[]>([]);
   const { setSpotifyPlaylist, setYoutubePlaylist } = usePlaylistContext();
   const router = useRouter();
+  const { addPlaylist } = usePlaylistStore.getState();
 
 
   //AU MONTAGE, ON CREE UN TABLEAU DE STRING POUR LES VALUES DU CHECKBOXGROUP
@@ -72,7 +73,9 @@ const TrackSelector: FC<IProps> = ({ playlist, from }) => {
 
       //ON INJECTE LES DATA DANS LE STATE CORRESPONDANT ET ON REDIRECT
       if (from === 'youtube') {
-        setSpotifyPlaylist(state.data);
+        // setSpotifyPlaylist(state.data);
+
+        addPlaylist(state.data, 'spotify');
         router.push('/to-spotify');
         return;
       }

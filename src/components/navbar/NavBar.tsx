@@ -1,12 +1,14 @@
 "use client";
 import { useSpotifyContext } from "@/src/context/SpotifySession.context";
+import { usePlaylistStore } from "@/src/store/Playlist.store";
 import { Spinner } from "@nextui-org/react";
-import { CircleCheckBig, CircleX } from "lucide-react";
+import { p } from "framer-motion/client";
+import { CircleCheckBig, CircleX, CloudDownload } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Yellowtail } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 
 const titleFont = Yellowtail({
   weight: ["400"],
@@ -16,6 +18,13 @@ const titleFont = Yellowtail({
 const NavBar = () => {
   const session = useSession();
   const spotifySession = useSpotifyContext();
+  const playlist = usePlaylistStore(state => state.playlist);
+
+  useEffect(() => {
+    usePlaylistStore.persist.rehydrate();
+  },[])
+
+  console.log(session.data?.refreshToken)
 
   return (
     <nav className="w-full py-2 px-6 flex items-center justify-between mb-8">
@@ -27,6 +36,23 @@ const NavBar = () => {
         </h1>
       </Link>
 
+      
+      {/* PLAYLIST ON QUEUE */}
+      <div>
+        {
+          playlist && (
+            <Link href='/convert' className="flex items-center gap-1 text-red-300 text-sm hover:font-semibold">
+              <p className="">
+                You got 1 playlist on queue
+              </p>
+              <CloudDownload className="animate-bounce"/>
+            </Link>
+          )
+        }
+      </div>
+
+      
+      {/* CONNEXION STATUS */}
       <div className=" min-h-full flex items-center gap-4">
         {/* TITLE */}
         <p className="text-sm text-center font-semibold text-gray-200">

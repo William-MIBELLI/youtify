@@ -8,6 +8,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { IYoutubePlaylist } from "@/src/interface/youtube.interface";
 import {
   getItemsFromPlaylist,
+  getPlaylistWithAPI,
   getUserPlaylist,
   PlaylistItem,
 } from "@/src/lib/request/youtube.request";
@@ -27,7 +28,8 @@ const YoutubeStepper = () => {
       return;
     }
     const data = await getUserPlaylist(session.data.accessToken);
-
+    const test = await getPlaylistWithAPI(session.data.accessToken);
+    console.log('TEST : ', test)
     console.log('DATA : ', data);
     if (data) {
       setPlaylists(data);

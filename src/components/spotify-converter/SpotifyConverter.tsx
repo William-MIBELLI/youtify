@@ -2,18 +2,24 @@
 import { usePlaylistContext } from '@/src/context/PlaylistContext.context'
 import { useSpotifyContext } from '@/src/context/SpotifySession.context';
 import { authInSpotify } from '@/src/lib/request/spotify.request';
+import { usePlaylistStore } from '@/src/store/Playlist.store';
 import { Button } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react'
 
 const SpotifyConverter = () => {
-
   const { spotifyPlaylist } = usePlaylistContext();
   const { isConnected, token } = useSpotifyContext();
   const [userConnected, setUserConnected] = useState<boolean>();
+  const playlist = usePlaylistStore(state => state.playlist);
+    
+  console.log('PLKAYLIST : ', playlist);
 
+  useEffect(() => {
+    usePlaylistStore.persist.rehydrate();
+  }, []);
 
   //SI PAS DE PLAYLIST
-  if (spotifyPlaylist) {
+  if (!playlist) {
     return (
       <div>
         No playlist to convert 🥲
@@ -21,14 +27,15 @@ const SpotifyConverter = () => {
     )
   }
 
+
   //VERIFIER SI L'USER EST CONNECTE DANS SPOTIFY SESSION
-  useEffect(() => {
-    const checkSession = async () => {
-      const isCo = await isConnected()
-      setUserConnected(isCo);
-    }
-    checkSession();
-  }, [token])
+  // useEffect(() => {
+  //   const checkSession = async () => {
+  //     const isCo = await isConnected()
+  //     setUserConnected(isCo);
+  //   }
+  //   checkSession();
+  // }, [token])
   
   if (!userConnected) {
     return (

@@ -1,11 +1,14 @@
 'use server';
 
 import { IYoutubePlaylist } from "@/src/interface/youtube.interface";
+import { access } from "fs";
 import { youtube_v3, google } from 'googleapis'
 
 const YOUTUBE_API_ENDPOINT = 'https://youtube.googleapis.com/youtube/v3'
 
 export const getUserPlaylist = async (accessToken: string) => {
+
+  console.log('ACCESS TOKEN DASN LE FETCH : ', accessToken);
 
   try {
     const { YOUTUBE_API_KEY } = process.env;
