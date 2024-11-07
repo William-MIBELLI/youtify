@@ -1,6 +1,6 @@
 "use server";
 
-import { google, GoogleApis } from "googleapis";
+import { google } from "googleapis";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import {
@@ -14,16 +14,16 @@ let client: OAuth2Client | null = null;
 
 export const getOauthClient = () => {
   if (!client) {
-    console.log('ON CREE LE CLIENT');
+    console.log("ON CREE LE CLIENT");
     client = new google.auth.OAuth2({
       clientId: process.env.GOOGLE_ID as string,
       clientSecret: process.env.GOOGLE_SECRET as string,
       redirectUri: process.env.GOOGLE_REDIRECT_URI as string,
     });
   }
-  client.on('tokens', (token) => {
-    console.log('TOKENS DANS LE CLIENT : ', token.access_token);
-  })
+  client.on("tokens", (token) => {
+    console.log("TOKENS DANS LE CLIENT : ", token.access_token);
+  });
 
   return client;
 };
@@ -93,24 +93,40 @@ export const getGoogleSession = async (): Promise<{
       throw new Error("No cookie session for this provider.");
     }
 
-    //ON LE PARSE ET ON LES PASSE AU CLIENT
-    const tokens = JSON.parse(cookieSession.value) as GoogleSessionToken;
+    //ON LE PARSE
+    let tokens = JSON.parse(cookieSession.value) as GoogleSessionToken;
+
+    //ON CHECK LA LIMITDATE, ET SELON ON REFRESH OU PAS
+    if (Date.now() >= tokens.limitDate && tokens.limitDate) {
+      const res = await refreshGoogleToken();
+      if (!res) {
+        throw new Error("no new token.");
+      }
+
+      // Au lieu de rappeler getGoogleSession, on récupère le nouveau cookie
+      const newCookieSession = await cookies().get("google-session");
+      if (!newCookieSession) {
+        throw new Error("No cookie session after refresh.");
+      }
+      tokens = JSON.parse(newCookieSession.value);
+    }
+
+    //ON PASSE LE TOKENS AU CLIENT
     const client = getOauthClient();
     client.setCredentials(tokens);
-
 
     //ON RECUPERE LES INFO DE L'USER GRACE A SON TOKEN
     const oauth2 = google.oauth2({ version: "v2", auth: client });
     const userinfo = await oauth2.userinfo.get();
 
     if (!userinfo.data) {
-      throw new Error('No data for this user.');
+      throw new Error("No data for this user.");
     }
 
     const userData: GoogleUserData = {
-      id: userinfo.data.id || '',
-      name: userinfo.data.name || '',
-      email: userinfo.data.email || '',
+      id: userinfo.data.id || "",
+      name: userinfo.data.name || "",
+      email: userinfo.data.email || "",
       picture: userinfo.data.picture || undefined,
     };
 
@@ -138,7 +154,10 @@ export const deleteGoogleSession = async () => {
     //ON CHECK SI UN ACCESS TOKEN EST PRESENT
     if (client.credentials.access_token) {
       client.revokeCredentials((error) => {
-        console.log('ERROR DELETING CREDENTIALS ON OAUTH CLIENT : ', error?.message)
+        console.log(
+          "ERROR DELETING CREDENTIALS ON OAUTH CLIENT : ",
+          error?.message
+        );
       });
     }
 
@@ -150,31 +169,31 @@ export const deleteGoogleSession = async () => {
 };
 
 export const refreshGoogleToken = async () => {
-
+  "use server";
   try {
-
     //ON RECUPERE LE COOKIE DE SESSION
-    const sessionCookie = await cookies().get('google-session');
+    const sessionCookie = await cookies().get("google-session");
 
     if (!sessionCookie) {
-      throw new Error('No session cookie.');
+      throw new Error("No session cookie.");
     }
     //ON PARSE LE TOKEN POUR RECUPERER LE REFRESH
     const tokens = JSON.parse(sessionCookie.value) as GoogleSessionToken;
 
     if (!tokens.refresh_token) {
-      throw new Error('No refresh token on cookie.');
+      throw new Error("No refresh token on cookie.");
     }
 
     //ON REQUEST UN NOUVEAU TOKEN
-    const response = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    const response = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         client_id: process.env.GOOGLE_ID as string,
         client_secret: process.env.GOOGLE_SECRET as string,
-        grant_type: 'refresh_token',
+        grant_type: "refresh_token",
         refresh_token: tokens.refresh_token,
+        access_type: "offline",
       }),
     });
 
@@ -182,14 +201,28 @@ export const refreshGoogleToken = async () => {
       throw new Error(response.statusText);
     }
 
-    const newTokens = await response.json() as GoogleSessionToken;
+    const newTokens = (await response.json()) as Omit<
+      GoogleSessionToken,
+      "limitDate"
+      >;
+    
+    //ON RAJOUTE LA LIMITDATE ET ON REMET LE REFRESHTOKEN
+    const limitDate = Date.now() + (newTokens.expiry_date || 0) * 1000;
+    const updatedToken: GoogleSessionToken = {
+      ...newTokens,
+      refresh_token: tokens.refresh_token,
+      limitDate,
+    };
 
-    //ON REMPLACE LA VALUE DU COOKIE AVEC LE NOUVEAU TOKEN
-    await cookies().set('google-session', JSON.stringify(newTokens));
+    //ON LA STRINGIFY
+    const value = JSON.stringify(updatedToken);
+
+    //ON REMPLACE LA VALUE DU COOKIE
+    await cookies().set("google-session", value);
 
     return true;
   } catch (error: any) {
-    console.log('ERROR REFRESH GOOGLE TOKEN : ', error?.message);
+    console.log("ERROR REFRESH GOOGLE TOKEN : ", error?.message);
     return null;
   }
-}
+};

@@ -5,6 +5,8 @@ import NavBar from "../components/navbar/NavBar";
 import SessionWrapper from "../components/sessionWrapper/SessionWrapper";
 import { SpotifyProvider } from "../context/SpotifySession.context";
 import { PlaylistContextProvider } from "../context/PlaylistContext.context";
+import { getGoogleSession } from "../lib/auth/google.auth";
+import SessionInitializer from "../components/session-initializer/SessionInitializer";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -16,16 +18,19 @@ export const metadata: Metadata = {
   description: "From Spotify to Youtube 🤯",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const googleData = await getGoogleSession();
   return (
     <html lang="en">
       <SessionWrapper>
         <SpotifyProvider>
           <PlaylistContextProvider>
+          <SessionInitializer googleData={googleData}/>
           <body
             className={`${roboto.className} antialiased bg-gray-950 min-h-screen`}
           >

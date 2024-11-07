@@ -41,8 +41,12 @@ export async function GET(request: Request) {
     return NextResponse.redirect('/auth-error/no-tokens');
   }
 
+  //ON RAJOUTE LA DATE LIMITE SUR LE TOKEN POUR POUVOIR
+  //FACILEMENT CHECK S'IL EST TOUJOURS VALIDE
+  const limitDate = Date.now() + ((tokens.expiry_date || 0) * 1000)
+
   //ON STOCKE TOUT CA DANS UN COOKIE
-  await cookies().set('google-session', JSON.stringify(tokens), {
+  await cookies().set('google-session', JSON.stringify({...tokens, limitDate}), {
     sameSite: true
   })
 

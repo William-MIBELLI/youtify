@@ -20,8 +20,8 @@ export type SessionAction = {
 export type SessionStore = SessionAction & SessionState;
 
 const initialState: SessionState = {
-  googleStatus: 'Unauthenticated',
-  spotifyStatus: 'Unauthenticated',
+  googleStatus: 'Loading',
+  spotifyStatus: 'Loading',
   googleData: undefined,
   spotifyData: undefined
 }
