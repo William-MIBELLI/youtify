@@ -1,10 +1,8 @@
 import { create } from "zustand";
 import {
   IPlaylistItem,
-  IYoutubePlaylist,
 } from "../interface/youtube.interface";
 import { SpotifyTrack } from "../interface/spotify.interface";
-import Spotify from "next-auth/providers/spotify";
 import { persist } from "zustand/middleware";
 
 export type PlaylistState = {

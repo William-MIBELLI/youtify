@@ -3,12 +3,11 @@
 import { IYoutubePlaylist } from "@/src/interface/youtube.interface";
 import { access } from "fs";
 import { youtube_v3, google } from 'googleapis'
+import { getOauthClient } from "../helpers/auth.helper";
 
 const YOUTUBE_API_ENDPOINT = 'https://youtube.googleapis.com/youtube/v3'
 
 export const getUserPlaylist = async (accessToken: string) => {
-
-  console.log('ACCESS TOKEN DASN LE FETCH : ', accessToken);
 
   try {
     const { YOUTUBE_API_KEY } = process.env;
@@ -27,7 +26,6 @@ export const getUserPlaylist = async (accessToken: string) => {
       }
     );
     if (!response.ok) {
-      console.log("reponse error : ", response.status);
       throw new Error('Response statuts : ' + response.statusText)
     }
     const data = (await response.json()) as IYoutubePlaylist;
@@ -56,7 +54,6 @@ export const getPlaylistWithAPI = async (access_token: string) => {
     }
 
     const playlist = response.data;
-    playlist.items?.forEach(item => console.log(item.snippet?.localized?.title))
     return playlist;
   } catch (error:any) {
     console.log('ERROR GET PLAYLIST WITH API : ', error?.message);
@@ -100,3 +97,14 @@ export const getItemsFromPlaylist = async (access_token: string, playlistId: str
 
 export type PlaylistItem = Awaited<ReturnType<typeof getItemsFromPlaylist>>;
 export type YTItem = PlaylistItem[number];
+
+
+export const getPlaylistFromUser = async () => {
+  try {
+    const client = getOauthClient();
+    const res = await client
+  } catch (error: any) {
+    console.log('ERROR GET PLAYLIST WITH OAUTHCLIENT : ', error?.message);
+    return null;
+  }
+}

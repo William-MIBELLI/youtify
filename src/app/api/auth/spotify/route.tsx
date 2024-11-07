@@ -45,7 +45,7 @@ export async function GET(request: Request) {
 
   // console.log("TOKEN : ", token);
 
-  const url = new URL("/auth-confirm", request.url);
+  const url = new URL("/auth-confirm/spotify", request.url);
   url.searchParams.set("code", code);
   url.searchParams.set("state", state);
   return NextResponse.redirect(url);

@@ -1,13 +1,16 @@
 "use client";
 import { useSpotifyContext } from "@/src/context/SpotifySession.context";
+import { deleteGoogleSession, loginWithGoogle, refreshGoogleToken } from "@/src/lib/auth/google.auth";
 import { usePlaylistStore } from "@/src/store/Playlist.store";
-import { Spinner } from "@nextui-org/react";
+import { useSessionStore } from "@/src/store/Session.store";
+import { Button, Spinner } from "@nextui-org/react";
 import { p } from "framer-motion/client";
 import { CircleCheckBig, CircleX, CloudDownload } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Yellowtail } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import React, { useEffect } from "react";
 
 const titleFont = Yellowtail({
@@ -19,13 +22,33 @@ const NavBar = () => {
   const session = useSession();
   const spotifySession = useSpotifyContext();
   const playlist = usePlaylistStore(state => state.playlist);
+  const googleStatus = useSessionStore(state => state.googleStatus);
+  const setGoogle = useSessionStore(state => state.setGoogle)
 
+
+  //ON REHYDRATE LES STORES
   useEffect(() => {
     usePlaylistStore.persist.rehydrate();
-  },[])
+    useSessionStore.persist.rehydrate();
+  }, [])
+  
+  useEffect(() => {
+    console.log('GOOGLE STATUS : ', googleStatus);
+  },[googleStatus])
 
-  console.log(session.data?.refreshToken)
 
+  const onLoginClick = async () => {
+    await loginWithGoogle();
+  }
+
+  const onLogoutClick = async () => {
+    await deleteGoogleSession();
+    setGoogle(undefined, 'Unauthenticated');
+  }
+  const onRefreshToken = async () => {
+    const res = await refreshGoogleToken();
+    console.log('RES ; ', res);
+ }
   return (
     <nav className="w-full py-2 px-6 flex items-center justify-between mb-8">
       <Link href={"/"}>
@@ -35,6 +58,23 @@ const NavBar = () => {
           Youtify
         </h1>
       </Link>
+      <div>
+        {
+          googleStatus === "Authenticated" ? (
+            <div>
+              <Button onClick={onLogoutClick}>Logout google</Button>
+              <Button onClick={onRefreshToken}>RefreshToken</Button>
+            </div>
+          ) : googleStatus === "Unauthenticated" ?(
+            <Button onClick={onLoginClick}>Login google</Button>
+            ) : (
+                <Spinner/>
+          )
+        }
+        <p>
+          Status google : {googleStatus}
+      </p>
+      </div>
 
       
       {/* PLAYLIST ON QUEUE */}
