@@ -71,8 +71,7 @@ export const getTokensWithCode = async (code: string) => {
   }
 };
 
-
-export const getSpotifySession = async (): Promise<UserData | null> => {
+export const getSpotifySession = async (): Promise<UserData | undefined> => {
   try {
     //ON RECUEPERE LE TOKEN DANS COOKIE DE SESSION
     const sessionCookie = await cookies().get('spotify-session')?.value;
@@ -127,7 +126,7 @@ export const getSpotifySession = async (): Promise<UserData | null> => {
 
   } catch (error: any) {
     console.log("ERROR GET TOKENS FROM COOKIES : ", error?.message);
-    return null;
+    return undefined;
   }
 };
 
@@ -166,12 +165,22 @@ export const refreshSpotifyTokens = async (): Promise<SpotifyToken | null> => {
     const newToken = addLimitDate(data);
 
     //ON REMPLACE LE COOKIE
-    await cookies().set('spotify-session', JSON.parse(newToken), {
+    await cookies().set('spotify-session', JSON.stringify(newToken), {
       httpOnly: true
     })
     return newToken;
   } catch (error: any) {
     console.log('ERROR GET REFRESH TOKEN : ', error?.message);
+    return null;
+  }
+}
+
+export const logoutWithSpotify = async () => {
+  try {
+    const spotifySession = await cookies().delete('spotify-session');
+    return true;
+  } catch (error: any) {
+    console.log('ERROR LOGOUT SPOTIFY : ', error?.message);
     return null;
   }
 }

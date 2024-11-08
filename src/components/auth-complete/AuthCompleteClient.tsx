@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import React, { FC, useEffect } from "react";
 
 interface IProps {
-  userData: UserData | null;
+  userData: UserData | undefined;
   provider: 'google' | 'spotify'
 }
 
@@ -16,9 +16,9 @@ const AuthCompleteClient: FC<IProps> = ({ userData, provider }) => {
 
   useEffect(() => {
     if (provider === 'google') {
-      setGoogle(userData || undefined);
+      setGoogle(userData);
     } else {
-      setSpotify(userData || undefined)
+      setSpotify(userData)
     }
     router.push("/");
   }, [userData, provider]);

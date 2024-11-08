@@ -1,6 +1,7 @@
 import { PlaylistItemForSelector } from "@/src/components/trackSelector/TrackSelector";
 import { PlaylistItem } from "../request/youtube.request";
-import { IPlaylistTracksList, SpotifyToken } from "@/src/interface/spotify.interface";
+import { IPlaylistTracksList } from "@/src/interface/spotify.interface";
+import { SpotifyToken } from "@/src/interface/auth.interface";
 
 export const mapYTPlaylist = (
   itemsList: PlaylistItem

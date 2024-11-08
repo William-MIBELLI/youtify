@@ -49,7 +49,7 @@ const page: FC<IProps> = async ({ searchParams }) => {
       <h1>
         Authentication Success
       </h1>
-      <AuthCompleteClient userData={userData.data} provider='google'/>
+      <AuthCompleteClient userData={userData} provider='google'/>
     </div>
   )
 }

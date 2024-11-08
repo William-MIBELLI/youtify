@@ -81,16 +81,13 @@ export const exchangeCodeForTokens = async (code: string) => {
   }
 };
 
-export const getGoogleSession = async (): Promise<{
-  data: UserData | null;
-  status: AuthenticationStatus;
-}> => {
+export const getGoogleSession = async (): Promise<UserData | undefined> => {
   try {
     //ON RECUPERE LE COOKIE DE LA SESSION
     const cookieSession = await cookies().get("google-session");
 
     if (!cookieSession) {
-      throw new Error("No cookie session for this provider.");
+      throw new Error("No google-session cookie.");
     }
 
     //ON LE PARSE
@@ -130,16 +127,10 @@ export const getGoogleSession = async (): Promise<{
       picture: userinfo.data.picture || undefined,
     };
 
-    return {
-      data: userData,
-      status: "Authenticated",
-    };
+    return userData;
   } catch (error: any) {
     console.log("ERROR GET GOOGLE SESSION : ", error?.message);
-    return {
-      data: null,
-      status: "Unauthenticated",
-    };
+    return undefined;
   }
 };
 
@@ -220,9 +211,33 @@ export const refreshGoogleToken = async () => {
     //ON REMPLACE LA VALUE DU COOKIE
     await cookies().set("google-session", value);
 
-    return true;
+    return updatedToken;
   } catch (error: any) {
     console.log("ERROR REFRESH GOOGLE TOKEN : ", error?.message);
     return null;
   }
 };
+
+export const getGoogleAccessToken = async () => {
+  try {
+    const cookieSession = await cookies().get('google-session')?.value;
+
+    if (!cookieSession) {
+      throw new Error('No google session.');
+    }
+
+    const tokens = JSON.parse(cookieSession) as GoogleSessionToken;
+
+    if (Date.now() >= tokens.limitDate) {
+      const newTokens = await refreshGoogleToken();
+      if (!newTokens) {
+        throw new Error('New tokens from refresh is null');
+      }
+      return newTokens.access_token;
+    }
+    return tokens.access_token;
+  } catch (error: any) {
+    console.log('ERROR GET GOOGLE ACCESS TOKEN : ', error?.message);
+    return null;
+  }
+}

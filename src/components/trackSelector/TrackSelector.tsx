@@ -4,7 +4,6 @@ import React, { FC, useEffect, useState } from "react";
 import Step from "../stepper/Step";
 import { useFormState } from "react-dom";
 import { convertYoutubeVideoToSpotifyTrack } from "@/src/lib/action/spotify.action";
-import { usePlaylistContext } from "@/src/context/PlaylistContext.context";
 import { useRouter } from "next/navigation";
 import { usePlaylistStore } from "@/src/store/Playlist.store";
 
@@ -27,7 +26,6 @@ const TrackSelector: FC<IProps> = ({ playlist, from }) => {
 
   const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
   const [mappedTracksValue, setMappedTracksValue] = useState<string[]>([]);
-  const { setSpotifyPlaylist, setYoutubePlaylist } = usePlaylistContext();
   const router = useRouter();
   const { addPlaylist } = usePlaylistStore.getState();
 

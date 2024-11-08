@@ -2,11 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Roboto } from "next/font/google";
 import NavBar from "../components/navbar/NavBar";
-import SessionWrapper from "../components/sessionWrapper/SessionWrapper";
-import { SpotifyProvider } from "../context/SpotifySession.context";
-import { PlaylistContextProvider } from "../context/PlaylistContext.context";
 import { getGoogleSession } from "../lib/auth/google.auth";
 import SessionInitializer from "../components/session-initializer/SessionInitializer";
+import { getSpotifySession } from "../lib/auth/spotify.auth";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -23,24 +21,17 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   const googleData = await getGoogleSession();
+  const spotifyData = await getSpotifySession();
   return (
     <html lang="en">
-      <SessionWrapper>
-        <SpotifyProvider>
-          <PlaylistContextProvider>
-          <SessionInitializer googleData={googleData}/>
-          <body
-            className={`${roboto.className} antialiased bg-gray-950 min-h-screen`}
-          >
-            <NavBar />
-            {children}
-          </body>
-
-          </PlaylistContextProvider>
-        </SpotifyProvider>
-      </SessionWrapper>
+      <SessionInitializer googleData={googleData} spotifyData={spotifyData} />
+      <body
+        className={`${roboto.className} antialiased bg-gray-950 min-h-screen`}
+      >
+        <NavBar />
+        {children}
+      </body>
     </html>
   );
 }

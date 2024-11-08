@@ -1,14 +1,11 @@
 'use client'
-import { usePlaylistContext } from '@/src/context/PlaylistContext.context'
-import { useSpotifyContext } from '@/src/context/SpotifySession.context';
-import { authInSpotify } from '@/src/lib/request/spotify.request';
+import { loginWithSpotify } from '@/src/lib/auth/spotify.auth';
 import { usePlaylistStore } from '@/src/store/Playlist.store';
 import { Button } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react'
 
 const SpotifyConverter = () => {
-  const { spotifyPlaylist } = usePlaylistContext();
-  const { isConnected, token } = useSpotifyContext();
+
   const [userConnected, setUserConnected] = useState<boolean>();
   const playlist = usePlaylistStore(state => state.playlist);
     
@@ -28,14 +25,6 @@ const SpotifyConverter = () => {
   }
 
 
-  //VERIFIER SI L'USER EST CONNECTE DANS SPOTIFY SESSION
-  // useEffect(() => {
-  //   const checkSession = async () => {
-  //     const isCo = await isConnected()
-  //     setUserConnected(isCo);
-  //   }
-  //   checkSession();
-  // }, [token])
   
   if (!userConnected) {
     return (
@@ -43,7 +32,7 @@ const SpotifyConverter = () => {
         <h2>
           You need to be logged in on your Spotify account 
         </h2>
-        <Button onClick={() => authInSpotify()}>Login on Spotify</Button>
+        <Button onClick={() => loginWithSpotify()}>Login on Spotify</Button>
       </div>
     )
   }

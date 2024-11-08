@@ -4,14 +4,13 @@ import { useSessionStore } from "@/src/store/Session.store";
 import React, { FC, useEffect } from "react";
 
 interface IProps {
-  googleData: {
-    data: UserData | null;
-    status: AuthenticationStatus;
-  };
+  googleData: UserData | undefined;
+  spotifyData: UserData | undefined;
 }
 
-const SessionInitializer: FC<IProps> = ({ googleData }) => {
+const SessionInitializer: FC<IProps> = ({ googleData, spotifyData }) => {
   const setGoogle = useSessionStore((state) => state.setGoogle);
+  const setSpotify = useSessionStore((state) => state.setSpotify);
   const google = useSessionStore((state) => state.googleData);
 
   //ON REHYDRATE AU MONTAGE
@@ -20,9 +19,9 @@ const SessionInitializer: FC<IProps> = ({ googleData }) => {
   }, []);
 
   useEffect(() => {
-    console.log("ON RENTRE DANS LE USEEFFECT DINITLIASE", google, googleData);
-    setGoogle(googleData.data || undefined, googleData.status);
-  }, [googleData, setGoogle]);
+    setGoogle(googleData);
+    setSpotify(spotifyData);
+  }, [googleData, setGoogle, spotifyData]);
 
   return null;
 };

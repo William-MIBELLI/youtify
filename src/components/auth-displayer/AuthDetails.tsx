@@ -13,7 +13,7 @@ import {
   deleteGoogleSession,
   loginWithGoogle,
 } from "@/src/lib/auth/google.auth";
-import { loginWithSpotify } from "@/src/lib/auth/spotify.auth";
+import { loginWithSpotify, logoutWithSpotify } from "@/src/lib/auth/spotify.auth";
 
 interface IProps {
   status: AuthenticationStatus;
@@ -34,6 +34,7 @@ const AuthDetails: FC<IProps> = ({ status, provider }) => {
       await deleteGoogleSession();
       return;
     }
+    await logoutWithSpotify();
   };
 
   return (
@@ -43,7 +44,7 @@ const AuthDetails: FC<IProps> = ({ status, provider }) => {
         {provider === "spotify" ? (
           <div className="flex items-center gap-1">
             <Image
-              src={"icons/spotify.svg"}
+              src={"/icons/spotify.svg"}
               alt="spotify_icon"
               width={15}
               height={15}
@@ -53,7 +54,7 @@ const AuthDetails: FC<IProps> = ({ status, provider }) => {
         ) : (
           <div className="flex items-center gap-1">
             <Image
-              src={"icons/youtube.svg"}
+              src={"/icons/youtube.svg"}
               alt="spotify_icon"
               width={15}
               height={15}

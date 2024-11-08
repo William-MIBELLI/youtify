@@ -1,10 +1,9 @@
 "use client";
 import { Button, Spinner } from "@nextui-org/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Step from "./Step";
 import SearchInput from "../input/SearchInput";
 import { MessageCircleQuestion } from "lucide-react";
-import { signIn, signOut, useSession } from "next-auth/react";
 import { IYoutubePlaylist } from "@/src/interface/youtube.interface";
 import {
   getItemsFromPlaylist,
@@ -14,22 +13,26 @@ import {
 } from "@/src/lib/request/youtube.request";
 import TrackSelector from "../trackSelector/TrackSelector";
 import { mapYTPlaylist } from "@/src/lib/helpers/mapper";
+import { loginWithGoogle } from "@/src/lib/auth/google.auth";
+import { useSessionStore } from "@/src/store/Session.store";
 
 const YoutubeStepper = () => {
   const [playlists, setPlaylists] = useState<IYoutubePlaylist>();
   const [videos, setVideos] = useState<PlaylistItem>();
+  const googleStatus = useSessionStore(state => state.googleStatus);
+
+
+  useEffect(() => {
+    useSessionStore.persist.rehydrate();
+  },[])
 
   const onCLickHandler = async () => {
-    await signIn("google");
+    await loginWithGoogle();
   };
 
   const onGetMyPlaylistsClick = async () => {
-    if (!session?.data?.accessToken) {
-      return;
-    }
-    const data = await getUserPlaylist(session.data.accessToken);
-    const test = await getPlaylistWithAPI(session.data.accessToken);
-    console.log('TEST : ', test)
+
+    const data = await getUserPlaylist();
     console.log('DATA : ', data);
     if (data) {
       setPlaylists(data);
@@ -38,17 +41,12 @@ const YoutubeStepper = () => {
 
   const onPlaylistClick = async (id: string) => {
 
-    if (!session?.data?.accessToken) {
-      return;
-    }
-    const res = await getItemsFromPlaylist(session.data.accessToken, id);
+    const res = await getItemsFromPlaylist(id);
     console.log("RES : ", res);
     if (res) {
       setVideos(res);
     }
   };
-
-  const session = useSession();
 
   return (
     <div>
@@ -62,17 +60,13 @@ const YoutubeStepper = () => {
             </p>
           </div>
         </form>
-        {session.status === "loading" ? (
-          <Spinner />
-        ) : session.status === "unauthenticated" ? (
-          <Button onClick={onCLickHandler}>Login</Button>
-        ) : (
-          <div>
-            <p>Logged as {session.data?.user?.email}</p>
-            <Button onClick={onGetMyPlaylistsClick}>Get my playlists</Button>
-            <Button onClick={() => signOut({ redirect: false })}>Logout</Button>
-          </div>
-        )}
+        {
+          googleStatus === 'Authenticated' && (
+            <div>
+              <Button onClick={onGetMyPlaylistsClick}>Get my playlists</Button>
+            </div>
+          )
+        }
       </Step>
       {(playlists && playlists.items.length > 0) && (
         <Step index={2} title="Select a playlist">
