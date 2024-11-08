@@ -1,38 +1,27 @@
 "use client";
-import { useSpotifyContext } from "@/src/context/SpotifySession.context";
-import {
-  AuthenticationStatus,
-  GoogleUserData,
-} from "@/src/interface/auth.interface";
-import { SpotifyToken } from "@/src/interface/spotify.interface";
+import { AuthenticationStatus, UserData } from "@/src/interface/auth.interface";
 import { useSessionStore } from "@/src/store/Session.store";
 import { useRouter } from "next/navigation";
 import React, { FC, useEffect } from "react";
 
 interface IProps {
-  token?: SpotifyToken;
-  userData?: {
-    status: AuthenticationStatus;
-    data: GoogleUserData | null;
-  };
+  userData: UserData | null;
+  provider: 'google' | 'spotify'
 }
 
-const AuthCompleteClient: FC<IProps> = ({ token, userData }) => {
-  
-  const { setToken } = useSpotifyContext();
+const AuthCompleteClient: FC<IProps> = ({ userData, provider }) => {
   const setGoogle = useSessionStore((state) => state.setGoogle);
+  const setSpotify = useSessionStore((state) => state.setSpotify);
   const router = useRouter();
 
   useEffect(() => {
-    if (token) {
-      setToken(token);
-    }
-
-    if (userData) {
-      setGoogle(userData.data || undefined, userData.status);
+    if (provider === 'google') {
+      setGoogle(userData || undefined);
+    } else {
+      setSpotify(userData || undefined)
     }
     router.push("/");
-  }, [token, userData]);
+  }, [userData, provider]);
 
   return <div>AuthCompleteClient</div>;
 };

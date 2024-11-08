@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import {
   AuthenticationStatus,
   GoogleSessionToken,
-  GoogleUserData,
+  UserData,
 } from "@/src/interface/auth.interface";
 import { OAuth2Client } from "google-auth-library";
 
@@ -82,7 +82,7 @@ export const exchangeCodeForTokens = async (code: string) => {
 };
 
 export const getGoogleSession = async (): Promise<{
-  data: GoogleUserData | null;
+  data: UserData | null;
   status: AuthenticationStatus;
 }> => {
   try {
@@ -123,7 +123,7 @@ export const getGoogleSession = async (): Promise<{
       throw new Error("No data for this user.");
     }
 
-    const userData: GoogleUserData = {
+    const userData: UserData = {
       id: userinfo.data.id || "",
       name: userinfo.data.name || "",
       email: userinfo.data.email || "",
@@ -204,8 +204,8 @@ export const refreshGoogleToken = async () => {
     const newTokens = (await response.json()) as Omit<
       GoogleSessionToken,
       "limitDate"
-      >;
-    
+    >;
+
     //ON RAJOUTE LA LIMITDATE ET ON REMET LE REFRESHTOKEN
     const limitDate = Date.now() + (newTokens.expiry_date || 0) * 1000;
     const updatedToken: GoogleSessionToken = {

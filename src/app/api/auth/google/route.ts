@@ -50,6 +50,11 @@ export async function GET(request: Request) {
     sameSite: true
   })
 
+  //ET LE CODE AUSSI
+  await cookies().set('google-code', code, {
+    httpOnly: true
+  })
+
   //ON REDIRIGE VERS UNE PAGE POUR POUVOIR RECUPERER TOUT CA DANS ZUSTAND
   const url = new URL("/auth-confirm/google", request.url);
   url.searchParams.set("code", code);

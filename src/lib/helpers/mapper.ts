@@ -52,6 +52,6 @@ export const mapCheckGroupValueToURLParams = (list: string[]) => {
   return mapped;
 }
 export const addLimitDate = (token: Omit<SpotifyToken, 'limitDate'>): SpotifyToken => {
-  const limitDate = Date.now();
+  const limitDate = Date.now() + (token.expires_in * 1000);
   return { ...token, limitDate };
  }

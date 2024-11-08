@@ -106,14 +106,7 @@ export interface ITracksListItem {
   track: SpotifyTrack
 }
 
-export interface SpotifyToken {
-  access_token: string;
-  token_type: "Bearer";
-  expires_in: number;
-  refresh_token: string;
-  scope: string;
-  limitDate: number;
-}
+
 
 export interface SpotifyTrack {
   album: {

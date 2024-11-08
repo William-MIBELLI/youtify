@@ -20,12 +20,21 @@ const page: FC<IProps> = async ({ searchParams }) => {
   }
 
   const serverState = await cookies().get('google-state');
+  const serverCode = await cookies().get('google-code');
   
   if (!serverState || serverState.value !== state) {
     return <div>
       Error With state 🙃
     </div>
   }
+
+  if (!serverCode|| serverCode.value !== code) {
+    return <div>
+      Code unmatch 🙃
+    </div>
+  }
+
+
   const userData = await getGoogleSession();
 
   if (!userData) {
@@ -40,7 +49,7 @@ const page: FC<IProps> = async ({ searchParams }) => {
       <h1>
         Authentication Success
       </h1>
-      <AuthCompleteClient userData={userData}/>
+      <AuthCompleteClient userData={userData.data} provider='google'/>
     </div>
   )
 }

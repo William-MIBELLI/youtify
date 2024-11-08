@@ -1,37 +1,43 @@
 import { create } from "zustand";
-import { SpotifyToken } from "../interface/spotify.interface";
 import { persist } from "zustand/middleware";
-import { AuthenticationStatus, GoogleUserData } from "../interface/auth.interface";
-
+import { AuthenticationStatus, UserData } from "../interface/auth.interface";
 
 export type SessionState = {
-  spotifyToken?: SpotifyToken;
-  googleData: GoogleUserData | undefined;
-  spotifyData: GoogleUserData | undefined;
+  googleData: UserData | undefined;
+  spotifyData: UserData | undefined;
   googleStatus: AuthenticationStatus;
   spotifyStatus: AuthenticationStatus;
-}
+};
 
 export type SessionAction = {
-  setGoogle: (data: GoogleUserData | undefined, status: AuthenticationStatus) => void;
-  // setSpotify: () => void
-}
+  setGoogle: (data: UserData | undefined) => void;
+  setSpotify: (data: UserData | undefined) => void;
+};
 
 export type SessionStore = SessionAction & SessionState;
 
 const initialState: SessionState = {
-  googleStatus: 'Loading',
-  spotifyStatus: 'Loading',
+  googleStatus: "Loading",
+  spotifyStatus: "Loading",
   googleData: undefined,
-  spotifyData: undefined
-}
+  spotifyData: undefined,
+};
 
 export const useSessionStore = create<SessionStore>()(
   persist(
     (set, get) => ({
       ...initialState,
-      setGoogle: (data, status) => set({ googleData: data, googleStatus: status }),
+      setGoogle: (data) =>
+        set({
+          googleData: data,
+          googleStatus: data ? "Authenticated" : "Unauthenticated",
+        }),
+      setSpotify: (data) =>
+        set({
+          spotifyData: data,
+          spotifyStatus: data ? "Authenticated" : "Unauthenticated",
+        }),
     }),
-    { name: 'session-storage', skipHydration: true }
+    { name: "session-storage", skipHydration: true }
   )
 );

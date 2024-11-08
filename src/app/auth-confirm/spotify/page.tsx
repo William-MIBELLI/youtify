@@ -1,6 +1,6 @@
 import AuthCompleteClient from "@/src/components/auth-complete/AuthCompleteClient";
-import { SpotifyToken } from "@/src/interface/spotify.interface";
-import { getTokensFromCookies } from "@/src/lib/request/spotify.request";
+import { SpotifyToken } from "@/src/interface/auth.interface";
+import { getSpotifySession } from "@/src/lib/auth/spotify.auth";
 import { cookies } from "next/headers";
 import React, { FC } from "react";
 
@@ -8,23 +8,29 @@ interface IProps {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 const page: FC<IProps> = async ({ searchParams }) => {
+
   const { state, code } = await searchParams;
 
-  if (!state || !code) {
-    return <div>Something goes wrong 🙃</div>;
+  const serverState = await cookies().get('spotify-state');
+  const serverCode = await cookies().get('spotify-code');
+
+  if (!serverState || serverState.value !== state) {
+    return <div>State error 🙃</div>;
   }
 
-  const data = await getTokensFromCookies(code, state);
+  if (!serverCode || serverCode.value !== code) {
+    return <div>Code error 🙃</div>;
+  }
+
+  const data = await getSpotifySession();
 
   if (!data) {
     return <div>No tokens 🥲</div>;
   }
 
-  const limitDate = Date.now() + 3500 * 1000;
-  const token: SpotifyToken = { ...data, limitDate };
   return (
     <div>
-      <AuthCompleteClient token={token} />
+      <AuthCompleteClient userData={data} provider="spotify" />
     </div>
   );
 };
