@@ -4,7 +4,7 @@ import { Roboto } from "next/font/google";
 import NavBar from "../components/navbar/NavBar";
 import { getGoogleSession } from "../lib/auth/google.auth";
 import SessionInitializer from "../components/session-initializer/SessionInitializer";
-import { getSpotifySession } from "../lib/auth/spotify.auth";
+import { getAllCookies, getSpotifySession } from "../lib/auth/spotify.auth";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -23,6 +23,7 @@ export default async function RootLayout({
 }>) {
   const googleData = await getGoogleSession();
   const spotifyData = await getSpotifySession();
+  // await getAllCookies();
   return (
     <html lang="en">
       <SessionInitializer googleData={googleData} spotifyData={spotifyData} />

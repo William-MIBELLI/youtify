@@ -62,8 +62,11 @@ const YoutubeStepper = () => {
         </form>
         {
           googleStatus === 'Authenticated' && (
-            <div>
-              <Button onClick={onGetMyPlaylistsClick}>Get my playlists</Button>
+            <div className="w-full mt-4 flex items-center gap-3 text-emerald-400 font-semibold">
+              <p>
+                Or you can look for your personnals playlists :
+              </p>
+              <Button variant="bordered" className="text-gray-200" onClick={onGetMyPlaylistsClick}>Get my playlists</Button>
             </div>
           )
         }

@@ -9,22 +9,18 @@ import {
   UserData,
 } from "@/src/interface/auth.interface";
 import { OAuth2Client } from "google-auth-library";
+import { updateCookie } from "../helpers/auth.helper";
 
 let client: OAuth2Client | null = null;
 
 export const getOauthClient = () => {
   if (!client) {
-    console.log("ON CREE LE CLIENT");
     client = new google.auth.OAuth2({
       clientId: process.env.GOOGLE_ID as string,
       clientSecret: process.env.GOOGLE_SECRET as string,
       redirectUri: process.env.GOOGLE_REDIRECT_URI as string,
     });
   }
-  client.on("tokens", (token) => {
-    console.log("TOKENS DANS LE CLIENT : ", token.access_token);
-  });
-
   return client;
 };
 
@@ -94,18 +90,12 @@ export const getGoogleSession = async (): Promise<UserData | undefined> => {
     let tokens = JSON.parse(cookieSession.value) as GoogleSessionToken;
 
     //ON CHECK LA LIMITDATE, ET SELON ON REFRESH OU PAS
-    if (Date.now() >= tokens.limitDate && tokens.limitDate) {
-      const res = await refreshGoogleToken();
-      if (!res) {
+    if (true) {
+      const newTokens = await refreshGoogleToken();
+      if (!newTokens) {
         throw new Error("no new token.");
       }
-
-      // Au lieu de rappeler getGoogleSession, on récupère le nouveau cookie
-      const newCookieSession = await cookies().get("google-session");
-      if (!newCookieSession) {
-        throw new Error("No cookie session after refresh.");
-      }
-      tokens = JSON.parse(newCookieSession.value);
+      tokens = newTokens;
     }
 
     //ON PASSE LE TOKENS AU CLIENT
@@ -144,12 +134,7 @@ export const deleteGoogleSession = async () => {
 
     //ON CHECK SI UN ACCESS TOKEN EST PRESENT
     if (client.credentials.access_token) {
-      client.revokeCredentials((error) => {
-        console.log(
-          "ERROR DELETING CREDENTIALS ON OAUTH CLIENT : ",
-          error?.message
-        );
-      });
+      client.setCredentials({});
     }
 
     return true;
@@ -160,7 +145,6 @@ export const deleteGoogleSession = async () => {
 };
 
 export const refreshGoogleToken = async () => {
-  "use server";
   try {
     //ON RECUPERE LE COOKIE DE SESSION
     const sessionCookie = await cookies().get("google-session");
@@ -209,7 +193,7 @@ export const refreshGoogleToken = async () => {
     const value = JSON.stringify(updatedToken);
 
     //ON REMPLACE LA VALUE DU COOKIE
-    await cookies().set("google-session", value);
+    await updateCookie(updatedToken, 'google');
 
     return updatedToken;
   } catch (error: any) {
@@ -228,7 +212,7 @@ export const getGoogleAccessToken = async () => {
 
     const tokens = JSON.parse(cookieSession) as GoogleSessionToken;
 
-    if (Date.now() >= tokens.limitDate) {
+    if (true) {
       const newTokens = await refreshGoogleToken();
       if (!newTokens) {
         throw new Error('New tokens from refresh is null');

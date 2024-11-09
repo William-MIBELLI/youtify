@@ -1,15 +1,18 @@
 'use client'
 import { loginWithSpotify } from '@/src/lib/auth/spotify.auth';
 import { usePlaylistStore } from '@/src/store/Playlist.store';
-import { Button } from '@nextui-org/react';
+import { useSessionStore } from '@/src/store/Session.store';
+import { Button, Checkbox, CheckboxGroup, Input } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react'
+import Step from '../stepper/Step';
+import { IPlaylistItem } from '@/src/interface/youtube.interface';
 
 const SpotifyConverter = () => {
 
-  const [userConnected, setUserConnected] = useState<boolean>();
   const playlist = usePlaylistStore(state => state.playlist);
+  const spotifyStatus = useSessionStore(state => state.spotifyStatus)
+  const [name, setName] = useState<string>();
     
-  console.log('PLKAYLIST : ', playlist);
 
   useEffect(() => {
     usePlaylistStore.persist.rehydrate();
@@ -24,9 +27,8 @@ const SpotifyConverter = () => {
     )
   }
 
-
-  
-  if (!userConnected) {
+  //SI L'USER N'EST PAS LOG
+  if (spotifyStatus && spotifyStatus !== "Authenticated") {
     return (
       <div>
         <h2>
@@ -49,7 +51,40 @@ const SpotifyConverter = () => {
   //MERCI ET BONNE JOURNEE
 
   return (
-    <div>SpotifyConverter</div>
+    <div>
+      <Step index={1} title='Name your new playlist'>
+        <Input type='text' variant='bordered' onValueChange={setName} classNames={{
+          'inputWrapper':[
+            'group-data-[focus=true]:border-white'
+          ]
+        }} />
+        <p className='text-xs mt-2'>
+          The name have to be 3 characters length minimum.
+        </p>
+      </Step>
+      {
+        (name && name.length >= 3) && (
+          <Step index={2} title='Playlist summary'>
+            <CheckboxGroup>
+              {
+                playlist.map(item => (
+                  <Checkbox>
+                    <div className='flex gap-3'>
+                      <p>
+                        {item.title}
+                      </p>
+                      <p>
+                        {item.artist}
+                      </p>
+                    </div>
+                  </Checkbox>
+                ))
+              }
+            </CheckboxGroup>
+          </Step>
+        )
+      }
+    </div>
   )
 }
 

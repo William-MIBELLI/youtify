@@ -47,7 +47,7 @@ export async function GET(request: Request) {
 
   //ON STOCKE TOUT CA DANS UN COOKIE
   await cookies().set('google-session', JSON.stringify({...tokens, limitDate}), {
-    sameSite: true
+    sameSite: true,
   })
 
   //ET LE CODE AUSSI

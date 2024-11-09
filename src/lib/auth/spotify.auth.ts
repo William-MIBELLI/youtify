@@ -4,6 +4,7 @@ import { SpotifyToken, UserData } from "@/src/interface/auth.interface";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { addLimitDate } from "../helpers/mapper";
+import { updateCookie } from "../helpers/auth.helper";
 
 
 
@@ -86,6 +87,7 @@ export const getSpotifySession = async (): Promise<UserData | undefined> => {
 
     //ON CHECK S'IL EST TOUJOURS VALIDE
     if (Date.now() >= tokens.limitDate) {
+
       //SI PAS VALIDE, ON LE REFRESH
       const newToken = await refreshSpotifyTokens();
 
@@ -133,15 +135,20 @@ export const getSpotifySession = async (): Promise<UserData | undefined> => {
 export const refreshSpotifyTokens = async (): Promise<SpotifyToken | null> => {
 
   try {
-    //ON RECUEPRE LE COOKIE
+    //ON RECUPERE LE COOKIE
     const sessionCookie = await cookies().get('spotify-session')?.value;
 
     if (!sessionCookie) {
       throw new Error('no spotify cookie session.');
     }
     const tokens = JSON.parse(sessionCookie) as SpotifyToken;
+
+    if (!tokens.refresh_token) {
+      throw new Error('No refresh token on session');
+    }
     const refresh_token = tokens.refresh_token;
     const client_id = process.env.SPOTIFY_CLIENT_ID as string;
+    const client_secret = process.env.SPOTIFY_CLIENT_SECRET as string;
 
     //ON EN REQUEST UN NOUVEAU
     const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -152,7 +159,8 @@ export const refreshSpotifyTokens = async (): Promise<SpotifyToken | null> => {
       body: new URLSearchParams({
         grant_type: 'refresh_token',
         refresh_token,
-        client_id
+        client_id,
+        client_secret
       }),
     })
 
@@ -164,16 +172,21 @@ export const refreshSpotifyTokens = async (): Promise<SpotifyToken | null> => {
     const data = await response.json() as Omit<SpotifyToken, 'limitDate'>;
     const newToken = addLimitDate(data);
 
+    //ON RAJOUTE LE REFRESH TOKEN SIL NEST PAS PRESENT DANS LE NOUVEAU
+    if (!newToken.refresh_token) {
+      newToken.refresh_token = tokens.refresh_token
+    }
+
     //ON REMPLACE LE COOKIE
-    await cookies().set('spotify-session', JSON.stringify(newToken), {
-      httpOnly: true
-    })
+    await updateCookie(newToken, 'spotify');
+
     return newToken;
   } catch (error: any) {
-    console.log('ERROR GET REFRESH TOKEN : ', error?.message);
+    console.log('ERROR GET SPOTIFY REFRESH TOKEN : ', error?.message);
     return null;
   }
 }
+
 
 export const logoutWithSpotify = async () => {
   try {
@@ -182,5 +195,17 @@ export const logoutWithSpotify = async () => {
   } catch (error: any) {
     console.log('ERROR LOGOUT SPOTIFY : ', error?.message);
     return null;
+  }
+}
+
+export const getAllCookies = async (): Promise<void> => {
+  try {
+    const spotifyCookies = await cookies().getAll('spotify-session');
+    const googleCookie = await cookies().getAll('google-session');
+
+    console.log('SPOTIFIY COOKIE : ', spotifyCookies);
+    console.log('GOOGLE COOKIES :', googleCookie);
+  } catch (error: any) {
+    console.log('ERROR GET ALL COKIES : ', error?.message);
   }
 }

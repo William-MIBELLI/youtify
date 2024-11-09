@@ -19,26 +19,32 @@ export const getUserPlaylist = async () => {
       throw new Error('API Key missing');
     }
 
-    const googleCookie = await cookies().get('google-session')?.value;
+    // const googleCookie = await cookies().get('google-session')?.value;
 
-    if (!googleCookie) {
-      throw new Error('No google session.');
+    // if (!googleCookie) {
+    //   throw new Error('No google session.');
+    // }
+
+    // const tokens = JSON.parse(googleCookie) as GoogleSessionToken;
+    const accessToken = await getGoogleAccessToken();
+
+    if (!accessToken) {
+      throw new Error('No access token.');
     }
-
-    const tokens = JSON.parse(googleCookie) as GoogleSessionToken;
 
     const response = await fetch(
       `${YOUTUBE_API_ENDPOINT}/playlists?part=snippet%2CcontentDetails&maxResults=25&mine=true&key=${YOUTUBE_API_KEY}`,
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${tokens.access_token}`,
+          Authorization: `Bearer ${accessToken}`,
           Accept: "application/json",
         },
       }
     );
     if (!response.ok) {
-      throw new Error('Response statuts : ' + response.statusText)
+      console.log(response);
+      throw new Error(response.statusText)
     }
     const data = (await response.json()) as IYoutubePlaylist;
     

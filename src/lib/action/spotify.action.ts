@@ -3,6 +3,7 @@
 import { ISpotifyRequestToken, SpotifyTrack } from "@/src/interface/spotify.interface";
 import { fetchSpotifyToken, getSpotifyUserPlaylists, retrieveTrackOnSpotify } from "../request/spotify.request";
 import { mapCheckGroupValueToURLParams } from "../helpers/mapper";
+import { Playlist } from "@/src/store/Playlist.store";
 
 export const searchSpotifyUserPlaylistACTION = async (state: unknown, fd: FormData) => {
   try {
@@ -45,16 +46,10 @@ export const getSpotifyToken = async () => {
     token = await fetchSpotifyToken();
     return token
   }
-
-  //ON CHECK S'IL EST TOUJOURS VALIDE
-  const now = Date.now()
 }
 
-export const convertYoutubeVideoToSpotifyTrack = async (tracks: string[], state: unknown, fd: FormData) => {
+export const convertYoutubeVideoToSpotifyTrack = async (tracks: string[]) => {
   try {
-
-    //ON CREE UN TABLEAU VIDE DE TRACKS SPOTIFY
-    const result: SpotifyTrack[] = [];
 
     //ON MAP LES SELECTEDTRACKS VERS DES URLSEARCHPARAMS
     const mappedTracks = mapCheckGroupValueToURLParams(tracks);
@@ -71,12 +66,21 @@ export const convertYoutubeVideoToSpotifyTrack = async (tracks: string[], state:
       }
     }))     
 
-    //ON FILTRE POUR ENELEVE LES UNDEFINED
+    //ON FILTRE POUR ENLEVER LES UNDEFINED
     const filtered = spotifyTracks.filter(item => item !== undefined)
 
-    return { success: true, data: filtered};
+    //ON MAP POUR METTRE AU FORMAT POUR LE STORE
+    const mappedToPlaylist: Playlist = filtered.map(item => {
+      return {
+        title: item.name,
+        artist: item.artists[0].name,
+        id: item.uri
+      }
+    })
+
+    return mappedToPlaylist;
   } catch (error: any) {
     console.log('ERROR CONVERT YOUTUBE VIDEO TO SPOTIFY ACTION : ', error?.message);
-    return { error: error?.message || 'Something goes wrong', success: false };
+    return null;
   }
 }

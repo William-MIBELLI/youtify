@@ -6,16 +6,22 @@ import { SpotifyTrack } from "../interface/spotify.interface";
 import { persist } from "zustand/middleware";
 
 export type PlaylistState = {
-  playlist?: IPlaylistItem[] | SpotifyTrack[];
+  playlist?: Playlist;
   type?: PlaylistType;
   playlistName?: string;
 };
 
 export type PlaylistType = "spotify" | "youtube";
 
+export type Playlist = {
+  title: string;
+  artist: string;
+  id: string;
+}[]
+
 export type PlaylistAction = {
   addPlaylist: (
-    playlist: IPlaylistItem[] | SpotifyTrack[],
+    playlist: Playlist,
     type: PlaylistType
   ) => void;
   removePlaylist: () => void;
