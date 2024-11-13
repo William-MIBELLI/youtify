@@ -13,6 +13,7 @@ import { cookies } from "next/headers";
 import { URLSearchParams } from "url";
 import { addLimitDate } from "../helpers/mapper";
 import { SpotifyToken } from "@/src/interface/auth.interface";
+import { getSpotifyAuthTokens, getSpotifySession } from "../auth/spotify.auth";
 
 const API_ENDPOINT = "https://api.spotify.com/v1";
 
@@ -138,27 +139,70 @@ export const getPlaylistTracks = async (playlistId: string) => {
 
 export const retrieveTrackOnSpotify = async (params: string) => {
   try {
-
     const token = await fetchSpotifyToken();
     const url = `${API_ENDPOINT}/search/?q=${params}&type=track&limit=1`;
     // console.log('URL : ', url);
     const response = await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Authorization': `Bearer ${token?.access_token}`
-      }
-    })
+        Authorization: `Bearer ${token?.access_token}`,
+      },
+    });
     if (!response.ok) {
       throw new Error(response.statusText);
     }
-    const res = await response.json() as {tracks: ISearchResult};
+    const res = (await response.json()) as { tracks: ISearchResult };
     const track = res.tracks.items[0];
 
     return track;
   } catch (error: any) {
-    console.log('ERROR RETRIEVE TRACKS ON SPOTIFY REQUEST : ', error?.message);
+    console.log("ERROR RETRIEVE TRACKS ON SPOTIFY REQUEST : ", error?.message);
     return null;
   }
 };
 
+export const createPlaylistOnSpotify = async (
+  userId: string,
+  name: string,
+  visibility: string
+) => {
+  try {
+    //ON RECUPERE LE TOKEN D'AUTH
+    const tokens = await getSpotifyAuthTokens();
+    if (!tokens) {
+      throw new Error("no tokens.");
+    }
 
+    const { access_token } = tokens;
+
+    //ON REQUEST L'API
+    const response = await fetch(`${API_ENDPOINT}/users/${userId}/playlists`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        public: visibility === "public",
+      }),
+    });
+
+    //ON CHECK SI LA REPONSE EST OK
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+
+    //ON RECUEPERE L'ID 
+    const data = (await response.json()) as {
+      id: string;
+      [key: string]: any;
+    };
+    console.log('DATA : ', data, data.id);
+    //ON RETURN L'ID
+    return data.id;
+  } catch (error: any) {
+    console.log("ERROR CREATE PLAYLSIT SPOTIFY REQUEST : ", error?.message);
+    return null;
+  }
+};

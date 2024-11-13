@@ -74,27 +74,10 @@ export const getTokensWithCode = async (code: string) => {
 
 export const getSpotifySession = async (): Promise<UserData | undefined> => {
   try {
-    //ON RECUEPERE LE TOKEN DANS COOKIE DE SESSION
-    const sessionCookie = await cookies().get('spotify-session')?.value;
+    const tokens = await getSpotifyAuthTokens();
 
-    //ON CHECK S'IL N'EST PAS UNDEFINED
-    if (!sessionCookie) {
-      throw new Error('No spotify-session cookie.');
-    }
-
-    //ON LE PARSE
-    const tokens = JSON.parse(sessionCookie) as SpotifyToken
-
-    //ON CHECK S'IL EST TOUJOURS VALIDE
-    if (Date.now() >= tokens.limitDate) {
-
-      //SI PAS VALIDE, ON LE REFRESH
-      const newToken = await refreshSpotifyTokens();
-
-      if (!newToken) {
-        throw new Error('New token is null.');
-      }
-      tokens.access_token = newToken.access_token
+    if (!tokens) {
+      throw new Error('No tokens.');
     }
 
     //ON RECUPERE LES INFOS DE L'USER CONNECTE
@@ -207,5 +190,37 @@ export const getAllCookies = async (): Promise<void> => {
     console.log('GOOGLE COOKIES :', googleCookie);
   } catch (error: any) {
     console.log('ERROR GET ALL COKIES : ', error?.message);
+  }
+}
+
+export const getSpotifyAuthTokens = async () => {
+  try {
+    //ON RECUEPERE LE TOKEN DANS COOKIE DE SESSION
+    const sessionCookie = await cookies().get('spotify-session')?.value;
+
+    //ON CHECK S'IL N'EST PAS UNDEFINED
+    if (!sessionCookie) {
+      throw new Error('No spotify-session cookie.');
+    }
+
+    //ON LE PARSE
+    const tokens = JSON.parse(sessionCookie) as SpotifyToken
+
+    //ON CHECK S'IL EST TOUJOURS VALIDE
+    if (Date.now() >= tokens.limitDate) {
+
+      //SI PAS VALIDE, ON LE REFRESH
+      const newToken = await refreshSpotifyTokens();
+
+      if (!newToken) {
+        throw new Error('New token is null.');
+      }
+      tokens.access_token = newToken.access_token
+    }
+
+    return tokens;
+  } catch (error: any) {
+    console.log('ERROR GET SPOTIFY ACCESS TOKEN : ', error?.message);
+    return null;
   }
 }
