@@ -198,11 +198,44 @@ export const createPlaylistOnSpotify = async (
       id: string;
       [key: string]: any;
     };
-    console.log('DATA : ', data, data.id);
+
     //ON RETURN L'ID
     return data.id;
+    
   } catch (error: any) {
     console.log("ERROR CREATE PLAYLSIT SPOTIFY REQUEST : ", error?.message);
     return null;
   }
 };
+
+export const addtracksOnPlaylist = async (playlistId: string, list: string[]) => {
+  try {
+    const tokens = await getSpotifyAuthTokens();
+    if (!tokens) {
+      throw new Error('No tokens.');
+    }
+    const response = await fetch(`${API_ENDPOINT}/playlists/${playlistId}/tracks`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${tokens.access_token}`,
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        uris: list,
+        position: 0
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+
+    const data = await response.json();
+
+    return data;
+    
+  } catch (error: any) {
+    console.log('ERROR ADD TRACKS PLAYLIST SPOTIFY : ', error?.message);
+    return null;
+  }
+}

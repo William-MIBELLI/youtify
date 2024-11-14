@@ -1,6 +1,6 @@
 'use server';
 
-import { createPlaylistOnSpotify } from "../request/spotify.request";
+import { addtracksOnPlaylist, createPlaylistOnSpotify } from "../request/spotify.request";
 
 export const createSpotifyPlaylistACTION = async (list: string[], state: unknown, fd: FormData) => {
   try {
@@ -22,8 +22,14 @@ export const createSpotifyPlaylistACTION = async (list: string[], state: unknown
     }
 
     //ICI ON DOIT RAJOUTER LES TRACKS A LA PLAYLIST FRAICHEMENT CREEE
+    const snapshotId = await addtracksOnPlaylist(playlistId, list);
 
-    return { success: true, playlistId };
+    if (!snapshotId) {
+      throw new Error('No snapshot id.');
+    }
+
+    return { success: true, snapshotId };
+    
   } catch (error: any) {
     console.log('ERROR CREATE SPOTIFY PLAYLIST ACTION : ', error?.message);
     return { success: false, error: error?.message || 'Something wents wrong.' };

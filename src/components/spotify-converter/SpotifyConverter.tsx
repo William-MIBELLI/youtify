@@ -57,6 +57,14 @@ const SpotifyConverter = () => {
 
   const [state, action] = useFormState(createSpotifyPlaylistACTION.bind(null, confirmed), undefined);
 
+
+  useEffect(() => {
+    if (state?.success && state.snapshotId) {
+      console.log('CREATION PLAYLIST OKKKK : ', state.snapshotId);
+      return
+    }
+  }, [state])
+  
   //SI PAS DE PLAYLIST
   if (!playlist) {
     return <div>No playlist to convert 🥲</div>;
