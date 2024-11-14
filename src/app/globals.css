@@ -23,4 +23,8 @@
   .container{
     @apply h-auto w-3/4 mx-auto flex flex-col gap-5 mt-16 text-gray-400 
   }
+
+  .link_text{
+    @apply text-gray-300 font-semibold hover:text-gray-200 cursor-pointer
+  }
 }

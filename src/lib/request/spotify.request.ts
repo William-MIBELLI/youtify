@@ -201,7 +201,7 @@ export const createPlaylistOnSpotify = async (
 
     //ON RETURN L'ID
     return data.id;
-    
+
   } catch (error: any) {
     console.log("ERROR CREATE PLAYLSIT SPOTIFY REQUEST : ", error?.message);
     return null;
@@ -230,9 +230,11 @@ export const addtracksOnPlaylist = async (playlistId: string, list: string[]) =>
       throw new Error(response.statusText);
     }
 
-    const data = await response.json();
+    const data = await response.json() as {
+      snapshot_id: string;
+    };
 
-    return data;
+    return data.snapshot_id;
     
   } catch (error: any) {
     console.log('ERROR ADD TRACKS PLAYLIST SPOTIFY : ', error?.message);

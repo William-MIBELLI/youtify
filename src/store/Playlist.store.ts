@@ -8,7 +8,8 @@ import { persist } from "zustand/middleware";
 export type PlaylistState = {
   playlist?: Playlist;
   type?: PlaylistType;
-  playlistName?: string;
+  createdPlaylistLink?: string
+
 };
 
 export type PlaylistType = "spotify" | "youtube";
@@ -25,16 +26,18 @@ export type PlaylistAction = {
     type: PlaylistType
   ) => void;
   removePlaylist: () => void;
+  addLink: (link: string) => void;
 };
 
 export type PlaylistStore = PlaylistAction & PlaylistState;
 
 export const usePlaylistStore = create<PlaylistStore>()(
-    persist(
-      (set) => ({
-        addPlaylist: (playlist, type) => set({ playlist, type }),
-        removePlaylist: () =>
-          set((state) => ({ playlist: undefined, type: undefined })),
+  persist(
+    (set) => ({
+      addPlaylist: (playlist, type) => set({ playlist, type }),
+      removePlaylist: () =>
+        set((state) => ({ playlist: undefined, type: undefined })),
+      addLink: (link) => set({ createdPlaylistLink: link }),
       }),
       { name: "playlist-storage", skipHydration: true }
     )

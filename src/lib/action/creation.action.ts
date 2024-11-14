@@ -27,8 +27,12 @@ export const createSpotifyPlaylistACTION = async (list: string[], state: unknown
     if (!snapshotId) {
       throw new Error('No snapshot id.');
     }
+    
+    console.log('SNAPSHOT ', snapshotId);
+    //ON CREE LE LIEN POUR LA PLAYLISTCREE
+    const playlistLink = `spotify:playlist:${snapshotId}`;
 
-    return { success: true, snapshotId };
+    return { success: true, playlistLink, error: undefined };
     
   } catch (error: any) {
     console.log('ERROR CREATE SPOTIFY PLAYLIST ACTION : ', error?.message);

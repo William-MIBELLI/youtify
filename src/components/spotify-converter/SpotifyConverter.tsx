@@ -15,14 +15,18 @@ import Step from "../stepper/Step";
 import { MessageCircleWarning } from "lucide-react";
 import { useFormState } from "react-dom";
 import { createSpotifyPlaylistACTION } from "@/src/lib/action/creation.action";
+import { redirect } from "next/navigation";
 
 const SpotifyConverter = () => {
   const playlist = usePlaylistStore((state) => state.playlist);
   const spotifyStatus = useSessionStore((state) => state.spotifyStatus);
   const spotifyData = useSessionStore((state) => state.spotifyData);
+  const addLink = usePlaylistStore(state => state.addLink);
+  const removePlaylist = usePlaylistStore(state => state.removePlaylist)
   const [name, setName] = useState<string>();
   const [confirmed, setConfirmed] = useState<string[]>([]);
   const [idArray, setIdArray] = useState<string[]>([]);
+  const [error, setError] = useState<string>();
 
   useEffect(() => {
     usePlaylistStore.persist.rehydrate();
@@ -59,9 +63,21 @@ const SpotifyConverter = () => {
 
 
   useEffect(() => {
-    if (state?.success && state.snapshotId) {
-      console.log('CREATION PLAYLIST OKKKK : ', state.snapshotId);
+
+    if (state && !state?.success) {
+      setError(state.error);
       return
+    }
+
+    if (state?.success && state.playlistLink) {
+      setError(undefined)
+
+      //ON UPDATE LE STORE
+      addLink(state.playlistLink);
+      removePlaylist();
+
+      //ET ON REDIRECT
+      redirect('/success');
     }
   }, [state])
   
