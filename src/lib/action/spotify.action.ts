@@ -69,16 +69,16 @@ export const convertYoutubeVideoToSpotifyTrack = async (tracks: string[]) => {
     //ON FILTRE POUR ENLEVER LES UNDEFINED
     const filtered = spotifyTracks.filter(item => item !== undefined)
 
-    //ON MAP POUR METTRE AU FORMAT POUR LE STORE
-    const mappedToPlaylist: Playlist = filtered.map(item => {
-      return {
-        title: item.name,
-        artist: item.artists[0].name,
-        id: item.uri
-      }
-    })
+    // //ON MAP POUR METTRE AU FORMAT POUR LE STORE
+    // const mappedToPlaylist: Playlist = filtered.map(item => {
+    //   return {
+    //     title: item.name,
+    //     artist: item.artists[0].name,
+    //     id: item.uri
+    //   }
+    // })
 
-    return mappedToPlaylist;
+    return filtered;
   } catch (error: any) {
     console.log('ERROR CONVERT YOUTUBE VIDEO TO SPOTIFY ACTION : ', error?.message);
     return null;

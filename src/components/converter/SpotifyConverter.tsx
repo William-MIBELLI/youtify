@@ -1,8 +1,9 @@
 "use client";
 import { loginWithSpotify } from "@/src/lib/auth/spotify.auth";
-import { usePlaylistStore } from "@/src/store/Playlist.store";
+import { Playlist, usePlaylistStore } from "@/src/store/Playlist.store";
 import { useSessionStore } from "@/src/store/Session.store";
 import {
+  button,
   Button,
   Checkbox,
   CheckboxGroup,
@@ -16,13 +17,14 @@ import { MessageCircleWarning } from "lucide-react";
 import { useFormState } from "react-dom";
 import { createSpotifyPlaylistACTION } from "@/src/lib/action/creation.action";
 import { redirect } from "next/navigation";
+import Track from "./Track";
 
 const SpotifyConverter = () => {
   const playlist = usePlaylistStore((state) => state.playlist);
   const spotifyStatus = useSessionStore((state) => state.spotifyStatus);
   const spotifyData = useSessionStore((state) => state.spotifyData);
-  const addLink = usePlaylistStore(state => state.addLink);
-  const removePlaylist = usePlaylistStore(state => state.removePlaylist)
+  const addLink = usePlaylistStore((state) => state.addLink);
+  const removePlaylist = usePlaylistStore((state) => state.removePlaylist);
   const [name, setName] = useState<string>();
   const [confirmed, setConfirmed] = useState<string[]>([]);
   const [idArray, setIdArray] = useState<string[]>([]);
@@ -33,9 +35,10 @@ const SpotifyConverter = () => {
     useSessionStore.persist.rehydrate();
   }, []);
 
+  //AU MONTAGE, ON RECUPERE TOUS LES ID
   useEffect(() => {
     if (playlist) {
-      const mapped = playlist.map((item) => item.id);
+      const mapped = playlist.map((item) => item[0].id);
       setIdArray(mapped);
     }
   }, [playlist]);
@@ -54,33 +57,62 @@ const SpotifyConverter = () => {
   const onSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked } = event.target;
     if (checked) {
-      return setConfirmed(idArray);
+      //ON RECUPERE LE 1ER ID DE CHAQUE PLAYLIST
+      const ids: string[] = [];
+      idArray.forEach((item) => ids.push(item));
+      return setConfirmed(ids);
     }
     setConfirmed([]);
   };
 
-  const [state, action] = useFormState(createSpotifyPlaylistACTION.bind(null, confirmed), undefined);
+  const updatePlaylist = (pl: Playlist, trackId: string) => {
+    //ON RECUPERE L'ITEM AVEC LE TRACKID
+    const track = pl.find((item) => item.id === trackId);
 
+    if (!track) {
+      return;
+    }
+
+    //ON REMOVE L'ID DU 1ER ELEMENT DES SELECTED SI IL Y ETAIT
+    const newConfirmed = confirmed.filter((item) => item !== pl[0].id);
+    newConfirmed.push(track.id);
+    setConfirmed(newConfirmed);
+
+    //ON MET A JOUR L'IDARRAY
+    const newIdArray = idArray.filter((id) => id !== pl[0].id);
+    newIdArray.push(track.id);
+    setIdArray(newIdArray);
+
+    // //ON CREE UN NOUVEAU TABLEAU EN LENLEVANT
+    // const filtered = pl.filter((item) => item.id !== trackId);
+
+    // //ON LE RAJOUTE AU DEBUT
+    // filtered.unshift(track);
+  };
+
+  const [state, action] = useFormState(
+    createSpotifyPlaylistACTION.bind(null, confirmed),
+    undefined
+  );
 
   useEffect(() => {
-
     if (state && !state?.success) {
       setError(state.error);
-      return
+      return;
     }
 
     if (state?.success && state.playlistLink) {
-      setError(undefined)
+      setError(undefined);
 
       //ON UPDATE LE STORE
       addLink(state.playlistLink);
       removePlaylist();
 
       //ET ON REDIRECT
-      redirect('/success');
+      redirect("/success");
     }
-  }, [state])
-  
+  }, [state]);
+
   //SI PAS DE PLAYLIST
   if (!playlist) {
     return <div>No playlist to convert 🥲</div>;
@@ -90,26 +122,21 @@ const SpotifyConverter = () => {
   if (!spotifyStatus || !spotifyData || spotifyStatus !== "Authenticated") {
     return (
       <div>
-        <h2>You need to be logged in on your Spotify account</h2>
-        <Button onClick={() => loginWithSpotify()}>Login on Spotify</Button>
+        <h2>You need to be logged in your Spotify account</h2>
+        <Button
+          className="my-3 text-gray-300"
+          variant="bordered"
+          onClick={() => loginWithSpotify()}
+        >
+          Login on Spotify
+        </Button>
       </div>
     );
   }
 
-
-  //NOM DE LA PLAYLIST
-
-  //RESUME DES TRACKS A AJOUTER
-
-  //EN PREMIERE ON CREE LA PLAYLIST ET ON RECUPERE SON ID
-
-  //ENSUITE ON AJOUTE LES TRACKS
-
-  //MERCI ET BONNE JOURNEE
-
   return (
     <form action={action} noValidate>
-      <input type="text" name="userId" hidden defaultValue={spotifyData.id}/>
+      <input type="text" name="userId" hidden defaultValue={spotifyData.id} />
       {/* PLAYLIST NAME */}
       <Step index={1} title="Name your new playlist and set its visibility">
         <Input
@@ -136,18 +163,26 @@ const SpotifyConverter = () => {
           classNames={{
             label: ["text-emerald-400 font-semibold"],
             wrapper: ["group-data-[focus=true]:border-white"],
-
           }}
-          
         >
-          <Radio classNames={{
-            label: ["text-gray-300"],
-            wrapper: ["group-data-[focus=true]:border-white"],
-          }} value={"public"}>Public</Radio>
-          <Radio classNames={{
-            label: ["text-gray-300"],
-            wrapper: ["group-data-[focus=true]:border-white"],
-          }} value={"private"}>Private</Radio>
+          <Radio
+            classNames={{
+              label: ["text-gray-300"],
+              wrapper: ["group-data-[focus=true]:border-white"],
+            }}
+            value={"public"}
+          >
+            Public
+          </Radio>
+          <Radio
+            classNames={{
+              label: ["text-gray-300"],
+              wrapper: ["group-data-[focus=true]:border-white"],
+            }}
+            value={"private"}
+          >
+            Private
+          </Radio>
         </RadioGroup>
       </Step>
 
@@ -162,6 +197,8 @@ const SpotifyConverter = () => {
               your new playlist.
             </p>
           </div>
+
+          {/* GLOBAL SELECT */}
           <Checkbox
             isSelected={idArray.length === confirmed.length}
             onChange={onSelectAllClick}
@@ -171,21 +208,24 @@ const SpotifyConverter = () => {
             </div>
           </Checkbox>
           <hr className="border-0 border-t border-gray-600 my-3"></hr>
+
+          {/* CHECKBOX LIST */}
           <CheckboxGroup value={confirmed}>
             {playlist.map((item) => (
-              <Checkbox
-                onChange={onCheckBoxChange}
-                key={item.id}
-                value={item.id}
-              >
-                <div className="flex gap-3 text-gray-300">
-                  <p>{item.title}</p>-<p>{item.artist}</p>
-                </div>
-              </Checkbox>
+              <Track
+                key={item[0].id}
+                changeHandler={onCheckBoxChange}
+                tracks={item}
+                updatePlaylist={updatePlaylist}
+              />
             ))}
           </CheckboxGroup>
-          <div className="my-4">
-            <Button type="submit" fullWidth>Let's convert</Button>
+
+          {/* SUBMIT BUTTON */}
+          <div className="my-8">
+            <Button type="submit" fullWidth>
+              Let's convert
+            </Button>
           </div>
         </Step>
       )}

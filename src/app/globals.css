@@ -27,4 +27,8 @@
   .link_text{
     @apply text-gray-300 font-semibold hover:text-gray-200 cursor-pointer
   }
+
+  .divider {
+    @apply border-0 border-t border-gray-600
+  }
 }

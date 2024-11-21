@@ -13,22 +13,22 @@ export async function GET(request: Request) {
   const error = searchParams.get("error");
   const state = searchParams.get("state");
   const cookieState = cookieStore.get("google-state");
-
+  const errorUrl = new URL("/auth-error", request.url);
 
   //ON CHECK LES POSSIBLES ERRORS
   if (!code) {
     console.log("NO CODE RECEIVED");
-    return NextResponse.redirect("/auth-error/no-code");
+    return NextResponse.redirect(errorUrl);
   }
 
   if (error) {
     console.log("ERROR : ", error);
-    return NextResponse.redirect("/auth-error/error");
+    return NextResponse.redirect(errorUrl);
   }
 
   if (!state || !cookieState || state !== cookieState.value) {
     console.log("STATE NOT MATCH : ", state, cookieState);
-    return NextResponse.redirect("/auth-error/state-missmatch");
+    return NextResponse.redirect(errorUrl);
   }
 
 

@@ -16,7 +16,7 @@ export const convertACTION = async (tracks: string[], state: unknown, fd: FormDa
 
     //ON CREE UN PLAYLIST ARRAY, POUR N'AVOIR QU'UN SEUL RETURN,
     //PEU IMPORTE LA METHODE
-    const data: Playlist = [];
+    const data: Playlist[] = [];
 
     //ON CALL LA METHODE APPROPRIEE
     if (from === "youtube") {

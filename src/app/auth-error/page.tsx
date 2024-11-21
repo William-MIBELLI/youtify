@@ -10,11 +10,11 @@ const page: FC<IProps> = async ({ searchParams }) => {
   return (
     <div className='w-full flex justify-center mt-40'>
       <h2 className='text-gray-300 flex gap-1'>
-        <span className='font-semibold text-gray-200'>
+        <span className='font-semibold text-gray-400'>
           Authentication Error : 
         </span>
-        <span>
-          {error || 'unknown error 🤔'}
+        <span className='text-gray-200'>
+          {error || 'Something wents wrong... 🤔'}
         </span>
       </h2>
     </div>

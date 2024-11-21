@@ -1,4 +1,4 @@
-import SpotifyConverter from '@/src/components/spotify-converter/SpotifyConverter'
+import SpotifyConverter from '@/src/components/converter/SpotifyConverter'
 import React from 'react'
 
 const page = async () => {

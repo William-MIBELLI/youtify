@@ -139,22 +139,34 @@ export const getPlaylistTracks = async (playlistId: string) => {
 
 export const retrieveTrackOnSpotify = async (params: string) => {
   try {
+
     const token = await fetchSpotifyToken();
-    const url = `${API_ENDPOINT}/search/?q=${params}&type=track&limit=1`;
-    // console.log('URL : ', url);
+    const url = `${API_ENDPOINT}/search/?q=${params}&type=track&limit=20`;
+
     const response = await fetch(url, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token?.access_token}`,
       },
     });
+
     if (!response.ok) {
       throw new Error(response.statusText);
     }
-    const res = (await response.json()) as { tracks: ISearchResult };
-    const track = res.tracks.items[0];
 
-    return track;
+    const res = (await response.json()) as { tracks: ISearchResult };
+
+    const filtered = res.tracks.items.filter(item => item !== undefined);
+    //ON MAP POUR METTRE AU FORMAT POUR LE STORE
+    const mapped = filtered.map(item => {
+      return {
+        title: item.name,
+        artist: item.artists[0].name,
+        id: item.uri
+      }
+    })
+
+    return mapped;
   } catch (error: any) {
     console.log("ERROR RETRIEVE TRACKS ON SPOTIFY REQUEST : ", error?.message);
     return null;

@@ -1,11 +1,7 @@
 'use server';
 
 import { IYoutubePlaylist } from "@/src/interface/youtube.interface";
-import { access } from "fs";
-import { youtube_v3, google } from 'googleapis'
-import { getOauthClient } from "../helpers/auth.helper";
-import { cookies } from "next/headers";
-import { GoogleSessionToken } from "@/src/interface/auth.interface";
+import { google } from 'googleapis'
 import { getGoogleAccessToken } from "../auth/google.auth";
 
 const YOUTUBE_API_ENDPOINT = 'https://youtube.googleapis.com/youtube/v3'
@@ -19,13 +15,6 @@ export const getUserPlaylist = async () => {
       throw new Error('API Key missing');
     }
 
-    // const googleCookie = await cookies().get('google-session')?.value;
-
-    // if (!googleCookie) {
-    //   throw new Error('No google session.');
-    // }
-
-    // const tokens = JSON.parse(googleCookie) as GoogleSessionToken;
     const accessToken = await getGoogleAccessToken();
 
     if (!accessToken) {
@@ -33,7 +22,7 @@ export const getUserPlaylist = async () => {
     }
 
     const response = await fetch(
-      `${YOUTUBE_API_ENDPOINT}/playlists?part=snippet%2CcontentDetails&maxResults=25&mine=true&key=${YOUTUBE_API_KEY}`,
+      `${YOUTUBE_API_ENDPOINT}/playlists?part=snippet%2CcontentDetails%2Cstatus&maxResults=25&mine=true&key=${YOUTUBE_API_KEY}`,
       {
         method: "GET",
         headers: {
@@ -57,19 +46,21 @@ export const getUserPlaylist = async () => {
 
 export type PlaylistsYT = Awaited<ReturnType<typeof getPlaylistWithAPI>>
 
-export const getPlaylistWithAPI = async () => {
+export const getPlaylistWithAPI = async (playlistId: string) => {
   try {
-    const access_token = await getGoogleAccessToken();
+    // const access_token = await getGoogleAccessToken();
 
-    if (!access_token) {
-      throw new Error('No access token.');
-    }
+    // if (!access_token) {
+    //   throw new Error('No access token.');
+    // }
     const youtube = google.youtube({ version: 'v3' });
     const response = await youtube.playlists.list({
-      access_token,
-      part: ['snippet'],
-      mine: true,
-      maxResults: 100
+      // access_token,
+      part: ['snippet', 'status'],
+      id: [
+        playlistId
+      ],
+      key: process.env.YOUTUBE_API_KEY as string
     })
     
     if (response.status !== 200) {
@@ -84,7 +75,7 @@ export const getPlaylistWithAPI = async () => {
   }
 }
 
-export const getItemsFromPlaylist = async (playlistId: string) => {
+export const getItemsFromPlaylist = async (playlistId: string, status?: string) => {
   try {
     const { YOUTUBE_API_KEY } = process.env;
 
@@ -92,10 +83,11 @@ export const getItemsFromPlaylist = async (playlistId: string) => {
       throw new Error('API Key missing');
     }
 
+    console.log('status : ', status);
     const access_token = await getGoogleAccessToken();
     
-    if (!access_token) {
-      throw new Error('No access token.');
+    if (!access_token && status && status === 'private') {
+      throw new Error('The playlist visibility is PRIVATE, and no access token found.');
     }
 
     const youtube = google.youtube({ version: 'v3' });
@@ -104,7 +96,7 @@ export const getItemsFromPlaylist = async (playlistId: string) => {
       part: ['snippet'],
       playlistId,
       maxResults: 100,
-      access_token
+      access_token: access_token || undefined
     })
 
     if (response.status !== 200) {
@@ -128,12 +120,4 @@ export type PlaylistItem = Awaited<ReturnType<typeof getItemsFromPlaylist>>;
 export type YTItem = PlaylistItem[number];
 
 
-export const getPlaylistFromUser = async () => {
-  try {
-    const client = getOauthClient();
-    const res = await client
-  } catch (error: any) {
-    console.log('ERROR GET PLAYLIST WITH OAUTHCLIENT : ', error?.message);
-    return null;
-  }
-}
+
