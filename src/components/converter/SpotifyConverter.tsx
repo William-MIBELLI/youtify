@@ -3,7 +3,6 @@ import { loginWithSpotify } from "@/src/lib/auth/spotify.auth";
 import { Playlist, usePlaylistStore } from "@/src/store/Playlist.store";
 import { useSessionStore } from "@/src/store/Session.store";
 import {
-  button,
   Button,
   Checkbox,
   CheckboxGroup,
@@ -15,20 +14,24 @@ import React, { useEffect, useState } from "react";
 import Step from "../stepper/Step";
 import { MessageCircleWarning } from "lucide-react";
 import { useFormState } from "react-dom";
-import { createSpotifyPlaylistACTION } from "@/src/lib/action/creation.action";
+import { createSpotifyPlaylistACTION, globalCreatePlaylistACTION } from "@/src/lib/action/creation.action";
 import { redirect } from "next/navigation";
 import Track from "./Track";
+import { loginWithGoogle } from "@/src/lib/auth/google.auth";
 
 const SpotifyConverter = () => {
-  const playlist = usePlaylistStore((state) => state.playlist);
-  const spotifyStatus = useSessionStore((state) => state.spotifyStatus);
-  const spotifyData = useSessionStore((state) => state.spotifyData);
+  // const playlist = usePlaylistStore((state) => state.playlist);
+  // const spotifyStatus = useSessionStore((state) => state.spotifyStatus);
+  // const spotifyData = useSessionStore((state) => state.spotifyData);
   const addLink = usePlaylistStore((state) => state.addLink);
   const removePlaylist = usePlaylistStore((state) => state.removePlaylist);
+  const playListstore = usePlaylistStore((state) => state);
+  const sessionStore = useSessionStore((state) => state);
   const [name, setName] = useState<string>();
   const [confirmed, setConfirmed] = useState<string[]>([]);
   const [idArray, setIdArray] = useState<string[]>([]);
   const [error, setError] = useState<string>();
+  const [userId, setUserId] = useState<string>();
 
   useEffect(() => {
     usePlaylistStore.persist.rehydrate();
@@ -36,12 +39,26 @@ const SpotifyConverter = () => {
   }, []);
 
   //AU MONTAGE, ON RECUPERE TOUS LES ID
+  // useEffect(() => {
+  //   if (playlist) {
+  //   }
+  // }, [playlist]);
   useEffect(() => {
+    console.log('SESSION : ', sessionStore);
+    console.log('PLAYLISIT : ', playListstore);
+  },[playListstore, sessionStore])
+
+  useEffect(() => {
+    const { playlist, origin } = playListstore;
+    const { googleData, spotifyData } = sessionStore;
     if (playlist) {
       const mapped = playlist.map((item) => item[0].id);
       setIdArray(mapped);
     }
-  }, [playlist]);
+    if (origin) {
+      setUserId(origin === "spotify" ? spotifyData?.id : googleData?.id);
+    }
+  }, [playListstore]);
 
   //CLICK SUR LES CHECKBOX CLASSIQUES
   const onCheckBoxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,6 +82,7 @@ const SpotifyConverter = () => {
     setConfirmed([]);
   };
 
+  //CLICK DANS LES RADIOGROUPS
   const updatePlaylist = (pl: Playlist, trackId: string) => {
     //ON RECUPERE L'ITEM AVEC LE TRACKID
     const track = pl.find((item) => item.id === trackId);
@@ -82,19 +100,15 @@ const SpotifyConverter = () => {
     const newIdArray = idArray.filter((id) => id !== pl[0].id);
     newIdArray.push(track.id);
     setIdArray(newIdArray);
-
-    // //ON CREE UN NOUVEAU TABLEAU EN LENLEVANT
-    // const filtered = pl.filter((item) => item.id !== trackId);
-
-    // //ON LE RAJOUTE AU DEBUT
-    // filtered.unshift(track);
   };
 
+  //SUBMIT
   const [state, action] = useFormState(
-    createSpotifyPlaylistACTION.bind(null, confirmed),
+    globalCreatePlaylistACTION.bind(null, confirmed),
     undefined
   );
 
+  //GESTION DU RETOUR DU SUBMIT
   useEffect(() => {
     if (state && !state?.success) {
       setError(state.error);
@@ -114,29 +128,48 @@ const SpotifyConverter = () => {
   }, [state]);
 
   //SI PAS DE PLAYLIST
-  if (!playlist) {
+  if (!playListstore.playlist) {
     return <div>No playlist to convert 🥲</div>;
   }
 
   //SI L'USER N'EST PAS LOG
-  if (!spotifyStatus || !spotifyData || spotifyStatus !== "Authenticated") {
+  if (
+    (playListstore.origin === "spotify" &&
+      sessionStore.googleStatus !== "Authenticated") ||
+    (playListstore.origin === "youtube" &&
+      sessionStore.spotifyStatus !== "Authenticated")
+  ) {
     return (
       <div>
-        <h2>You need to be logged in your Spotify account</h2>
-        <Button
-          className="my-3 text-gray-300"
-          variant="bordered"
-          onClick={() => loginWithSpotify()}
-        >
-          Login on Spotify
-        </Button>
+        <h2>
+          You need to be logged in your{" "}
+          {playListstore.origin === "spotify" ? "Google" : "Spotify"} account
+        </h2>
+        {playListstore.origin === "youtube" ? (
+          <Button
+            className="my-3 text-gray-300"
+            variant="bordered"
+            onClick={loginWithSpotify}
+          >
+            Log in Spotify
+          </Button>
+        ) : (
+          <Button
+            className="my-3 text-gray-300"
+            variant="bordered"
+            onClick={loginWithGoogle}
+          >
+            Log in Youtube
+          </Button>
+        )}
       </div>
     );
   }
 
   return (
     <form action={action} noValidate>
-      <input type="text" name="userId" hidden defaultValue={spotifyData.id} />
+      <input type="text" name="userId" hidden defaultValue={userId} />
+      <input type="text" name="origin" hidden defaultValue={playListstore.origin} />
       {/* PLAYLIST NAME */}
       <Step index={1} title="Name your new playlist and set its visibility">
         <Input
@@ -211,7 +244,7 @@ const SpotifyConverter = () => {
 
           {/* CHECKBOX LIST */}
           <CheckboxGroup value={confirmed}>
-            {playlist.map((item) => (
+            {playListstore.playlist.map((item) => (
               <Track
                 key={item[0].id}
                 changeHandler={onCheckBoxChange}

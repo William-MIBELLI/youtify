@@ -25,7 +25,7 @@ const Track: FC<IProps> = ({ changeHandler, tracks, updatePlaylist }) => {
   },[selectedTrack])
 
   return (
-    <div className="w-full  flex flex-col">
+    <div className="w-full  flex flex-col hover:bg-gray-900 rounded-lg">
       <div className="flex justify-between">
         <Checkbox onChange={changeHandler} value={selectedTrack.id}>
           <div className="flex gap-3 text-gray-300">

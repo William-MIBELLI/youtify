@@ -59,6 +59,8 @@ const TrackSelector: FC<IProps> = ({ playlist, from }) => {
     setSelectedTracks([]);
   };
 
+
+  //ACTION POUR LE FORMULAIRE
   const [state, action] = useFormState(
     convertACTION.bind(null, selectedTracks),
     undefined
@@ -70,10 +72,10 @@ const TrackSelector: FC<IProps> = ({ playlist, from }) => {
     if (state?.success && state?.data) {
 
       //ON DEFINIT LE TYPE DE PLAYLIST SELON L'ORIGIN
-      const type: PlaylistType = from === "spotify" ? "youtube" : "spotify";
+      // const type: PlaylistType = from === "spotify" ? "youtube" : "spotify";
 
       //ON L'AJOUTE DANS LE STORE
-      addPlaylist(state.data, type);
+      addPlaylist(state.data, from);
 
       //ET ON REDIRIGE
       router.push("/convert");

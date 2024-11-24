@@ -3,6 +3,9 @@
 import { IYoutubePlaylist } from "@/src/interface/youtube.interface";
 import { google } from 'googleapis'
 import { getGoogleAccessToken } from "../auth/google.auth";
+import Schema$PlaylistItem from 'googleapis'
+import { Playlist, TrackToConvert } from "@/src/store/Playlist.store";
+import Youtube, { Video, youtube } from "scrape-youtube";
 
 const YOUTUBE_API_ENDPOINT = 'https://youtube.googleapis.com/youtube/v3'
 
@@ -118,6 +121,38 @@ export const getItemsFromPlaylist = async (playlistId: string, status?: string) 
 
 export type PlaylistItem = Awaited<ReturnType<typeof getItemsFromPlaylist>>;
 export type YTItem = PlaylistItem[number];
+
+export const scrapVideoOnYoutube = async (playlist: string[]) => {
+  try {
+
+    //ON FAIT UN PROMISE ALL POUR LOOP SUR LA PLAYLIST EN ARGUMENT
+    const vids = await Promise.all(playlist.map(async (track) => {
+
+      //ON REQUEST LE SCRAPPER
+      const res = await youtube.search(track, {
+        type: 'video',
+      })
+
+      //ON MAP LE RESULT VERS UN TYPE PLAYLIST POUR FIT LE STORE
+      const mapped: Playlist = res.videos.map(item => {
+        const mp: TrackToConvert = {
+          id: item.id,
+          title: item.title,
+          artist: item.channel.name
+        }
+        return mp;
+      })
+      return mapped;
+    }))
+
+    //ON RETURN LE PROMISE ALL
+    return vids;
+
+  } catch (error: any) {
+    console.log('ERROR SCRAP VIDEOS YOUTUBE REQUEST : ', error?.message);
+    return null;
+  }
+}
 
 
 

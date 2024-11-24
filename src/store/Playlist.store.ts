@@ -7,7 +7,7 @@ import { persist } from "zustand/middleware";
 
 export type PlaylistState = {
   playlist?: Playlist[];
-  type?: PlaylistType;
+  origin?: PlaylistType;
   createdPlaylistLink?: string
 
 };
@@ -25,7 +25,7 @@ export type Playlist = TrackToConvert[]
 export type PlaylistAction = {
   addPlaylist: (
     playlist: Playlist[],
-    type: PlaylistType
+    origin: PlaylistType
   ) => void;
   removePlaylist: () => void;
   addLink: (link: string) => void;
@@ -36,7 +36,7 @@ export type PlaylistStore = PlaylistAction & PlaylistState;
 export const usePlaylistStore = create<PlaylistStore>()(
   persist(
     (set) => ({
-      addPlaylist: (playlist, type) => set({ playlist, type }),
+      addPlaylist: (playlist, origin) => set({ playlist, origin }),
       removePlaylist: () =>
         set((state) => ({ playlist: undefined, type: undefined })),
       addLink: (link) => set({ createdPlaylistLink: link }),
