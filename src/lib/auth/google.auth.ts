@@ -48,6 +48,7 @@ export const loginWithGoogle = async () => {
     scope: scopes,
     state,
     include_granted_scopes: true,
+    prompt: 'consent'
   });
 
   redirect(authorizationUrl);
@@ -90,7 +91,7 @@ export const getGoogleSession = async (): Promise<UserData | undefined> => {
     let tokens = JSON.parse(cookieSession.value) as GoogleSessionToken;
 
     //ON CHECK LA LIMITDATE, ET SELON ON REFRESH OU PAS
-    if (true) {
+    if (true && tokens.refresh_token) {
       const newTokens = await refreshGoogleToken();
       if (!newTokens) {
         throw new Error("no new token.");
@@ -212,7 +213,7 @@ export const getGoogleAccessToken = async () => {
 
     const tokens = JSON.parse(cookieSession) as GoogleSessionToken;
 
-    if (true) {
+    if (true && tokens.refresh_token) {
       const newTokens = await refreshGoogleToken();
       if (!newTokens) {
         throw new Error('New tokens from refresh is null');

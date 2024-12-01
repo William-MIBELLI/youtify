@@ -1,7 +1,7 @@
 import { Button, Spinner } from "@nextui-org/react";
 import { Search } from "lucide-react";
 import { Input } from "@nextui-org/react";
-import React, { FC } from "react";
+import React, { FC, InputHTMLAttributes } from "react";
 import { useFormStatus } from "react-dom";
 
 interface IProps {
@@ -16,7 +16,7 @@ const SearchInput: FC<IProps> = ({ name, error }) => {
   return (
     <div>
       <div className="flex gap-2">
-        <Input isDisabled={pending} variant="bordered" name={name} />
+        <Input isDisabled={pending} variant="bordered" name={name}/>
         <Button isDisabled={pending} type="submit" endContent={ pending ?<Spinner size="sm" color="white"/> : <Search size={20} />} isIconOnly />
       </div>
       <p className="my-3 text-center text-sm text-red-400">

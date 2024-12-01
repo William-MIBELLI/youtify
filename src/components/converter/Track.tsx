@@ -18,7 +18,6 @@ const Track: FC<IProps> = ({ changeHandler, tracks, updatePlaylist }) => {
   const [selectedTrack, setSelectedTrack] = useState<TrackToConvert>(item);
 
   useEffect(() => {
-    console.log('ID SELECTED : ', selectedTrack);
     if (selectedTrack) {
       updatePlaylist(tracks, selectedTrack.id);
     }

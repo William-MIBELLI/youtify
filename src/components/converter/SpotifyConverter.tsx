@@ -20,9 +20,7 @@ import Track from "./Track";
 import { loginWithGoogle } from "@/src/lib/auth/google.auth";
 
 const SpotifyConverter = () => {
-  // const playlist = usePlaylistStore((state) => state.playlist);
-  // const spotifyStatus = useSessionStore((state) => state.spotifyStatus);
-  // const spotifyData = useSessionStore((state) => state.spotifyData);
+  
   const addLink = usePlaylistStore((state) => state.addLink);
   const removePlaylist = usePlaylistStore((state) => state.removePlaylist);
   const playListstore = usePlaylistStore((state) => state);
@@ -38,15 +36,14 @@ const SpotifyConverter = () => {
     useSessionStore.persist.rehydrate();
   }, []);
 
-  //AU MONTAGE, ON RECUPERE TOUS LES ID
-  // useEffect(() => {
-  //   if (playlist) {
-  //   }
-  // }, [playlist]);
   useEffect(() => {
     console.log('SESSION : ', sessionStore);
     console.log('PLAYLISIT : ', playListstore);
-  },[playListstore, sessionStore])
+  }, [playListstore, sessionStore])
+  
+  useEffect(() => {
+    console.log('CONFIRMED : ', confirmed);
+  },[confirmed])
 
   useEffect(() => {
     const { playlist, origin } = playListstore;

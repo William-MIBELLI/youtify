@@ -5,6 +5,7 @@ import {
   addtracksOnPlaylist,
   createPlaylistOnSpotify,
 } from "../request/spotify.request";
+import { createPlaylistOnYoutube, insertVideoOnPLaylistYoutube } from "../request/youtube.request";
 
 type OptionCreation = {
   title: string;
@@ -76,15 +77,15 @@ export const createSpotifyPlaylistACTION = async (options: OptionCreation) => {
 };
 
 export const createYoutubePlaylistACTION = async (options: OptionCreation) => {
-    const res = await google.youtube("v3").playlists.insert({
-      requestBody: {
-        status: {
-          privacyStatus: "",
-        },
-        snippet: {
-          title: "",
-        },
-      },
-    });
-    return ''
+
+  const { title, visibility, list} = options;
+  //ON CREE UNE NOUVELLE PLAYLIST ET ON RECUPERE L'ID
+  const playlistId = await createPlaylistOnYoutube(title, visibility);
+
+  //AVEC L'ID, ON AJOUTE LA LIST DE VIDEO A LA PLAYLIST CREEE
+  const res = await insertVideoOnPLaylistYoutube(playlistId, list);
+
+  //ON RETURN LE LINK VERS LA PLAYLIST
+  return `https://www.youtube.com/playlist?list=${playlistId}`;
+    
 };
