@@ -183,42 +183,36 @@ export const createPlaylistOnYoutube = async (
 };
 
 export const insertVideoOnPLaylistYoutube = async (
-  playlsitId: string,
-  list: string[]
+  playlistId: string,
+  videoId: string
 ) => {
   const accessToken = await getGoogleAccessToken();
   const auth = process.env.GOOGLE_API_KEY as string;
-  // const videoId = list[0];
   try {
-    await Promise.all(
-      list.map(async (videoId) => {
-        console.log('BIP ', videoId)
-        const res = await google.youtube("v3").playlistItems.insert({
-          auth,
-          access_token: accessToken!,
-          part: ["snippet"],
-          requestBody: {
-            snippet: {
-              resourceId: {
-                videoId,
-                kind: "youtube#video",
-              },
-              playlistId: playlsitId,
-            },
+    console.log("Ajout de la video : ", videoId);
+    const res = await google.youtube("v3").playlistItems.insert({
+      auth,
+      access_token: accessToken!,
+      part: ["snippet"],
+      requestBody: {
+        snippet: {
+          resourceId: {
+            videoId,
+            kind: "youtube#video",
           },
-        });
-        if (res.status !== 200) {
-          throw new Error(
-            `GOOGLE INSERT ITEMS ON PLAYLIST ERROR : ${res.statusText}`
-          );
-        }
-      })
-    );
+          playlistId,
+        },
+      },
+    });
+    if (res.status !== 200) {
+      throw new Error(
+        `GOOGLE INSERT ITEMS ON PLAYLIST ERROR : ${res.statusText}`
+      );
+    }
+
     return true;
-    
   } catch (error: any) {
     console.log(error?.message);
-    return false
+    return false;
   }
-
 };

@@ -82,8 +82,12 @@ export const createYoutubePlaylistACTION = async (options: OptionCreation) => {
   //ON CREE UNE NOUVELLE PLAYLIST ET ON RECUPERE L'ID
   const playlistId = await createPlaylistOnYoutube(title, visibility);
 
-  //AVEC L'ID, ON AJOUTE LA LIST DE VIDEO A LA PLAYLIST CREEE
-  const res = await insertVideoOnPLaylistYoutube(playlistId, list);
+  //AVEC L'ID DE LA PLAYLIST, ON LOOP SUR LA LIST DES VIDEOID POUR LES ADD 1 PAR 1
+  for (const videoId of list) {
+    
+    const res = await insertVideoOnPLaylistYoutube(playlistId, videoId);
+    console.log('Video ajouté : ', res);
+  }
 
   //ON RETURN LE LINK VERS LA PLAYLIST
   return `https://www.youtube.com/playlist?list=${playlistId}`;

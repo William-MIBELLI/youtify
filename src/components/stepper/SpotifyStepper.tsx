@@ -61,10 +61,7 @@ const SpotifyStepper = () => {
 
   return (
     <div className="w-full flex flex-col gap-5">
-      {/* LOGIN BUTTON IF USER NOT CONNECTED ON SPOTIFY */}
-      {sessionStore.spotifyStatus === "Unauthenticated" && (
-        <Button onClick={onLoginClick}>Spotify LOGIN</Button>
-      )}
+    
 
       {/* SELECT USER */}
       <Step index={1} title="Select an user">

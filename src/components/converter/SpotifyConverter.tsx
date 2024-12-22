@@ -31,20 +31,13 @@ const SpotifyConverter = () => {
   const [error, setError] = useState<string>();
   const [userId, setUserId] = useState<string>();
 
+  //ON REHYDRATE LES STORES AU MONTAGE
   useEffect(() => {
     usePlaylistStore.persist.rehydrate();
     useSessionStore.persist.rehydrate();
   }, []);
 
-  useEffect(() => {
-    console.log('SESSION : ', sessionStore);
-    console.log('PLAYLISIT : ', playListstore);
-  }, [playListstore, sessionStore])
-  
-  useEffect(() => {
-    console.log('CONFIRMED : ', confirmed);
-  },[confirmed])
-
+  //ON CREE LE TABLEAU POUR LES CHECKBOX VALUES
   useEffect(() => {
     const { playlist, origin } = playListstore;
     const { googleData, spotifyData } = sessionStore;
@@ -53,7 +46,7 @@ const SpotifyConverter = () => {
       setIdArray(mapped);
     }
     if (origin) {
-      setUserId(origin === "spotify" ? spotifyData?.id : googleData?.id);
+      setUserId(origin === "youtube" ? spotifyData?.id : googleData?.id);
     }
   }, [playListstore]);
 
@@ -105,6 +98,15 @@ const SpotifyConverter = () => {
     undefined
   );
 
+  //SI L'USER N'EST PAS LOGGED
+  const onLoginClick = async () => {
+    if (playListstore.origin === 'youtube') {
+      await loginWithSpotify()
+      return
+    }
+    await loginWithGoogle()
+  }
+
   //GESTION DU RETOUR DU SUBMIT
   useEffect(() => {
     if (state && !state?.success) {
@@ -146,7 +148,7 @@ const SpotifyConverter = () => {
           <Button
             className="my-3 text-gray-300"
             variant="bordered"
-            onClick={loginWithSpotify}
+            onClick={onLoginClick}
           >
             Log in Spotify
           </Button>
@@ -154,7 +156,7 @@ const SpotifyConverter = () => {
           <Button
             className="my-3 text-gray-300"
             variant="bordered"
-            onClick={loginWithGoogle}
+            onClick={onLoginClick}
           >
             Log in Youtube
           </Button>

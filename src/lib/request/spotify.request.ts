@@ -187,6 +187,7 @@ export const createPlaylistOnSpotify = async (
 
     const { access_token } = tokens;
 
+    console.log('USER ID : ', userId);
     //ON REQUEST L'API
     const response = await fetch(`${API_ENDPOINT}/users/${userId}/playlists`, {
       method: "POST",
@@ -202,7 +203,7 @@ export const createPlaylistOnSpotify = async (
 
     //ON CHECK SI LA REPONSE EST OK
     if (!response.ok) {
-      throw new Error(response.statusText);
+      throw new Error(`${response.status} - ${response.statusText}`);
     }
 
     //ON RECUEPERE L'ID 
